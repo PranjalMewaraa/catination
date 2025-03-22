@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  ScrollView,
 } from "react-native";
 
 // Assuming these are your props or state
@@ -43,7 +44,7 @@ const ChatPreview = ({ selected }) => {
           </View>
 
           {/* Chat Message Section */}
-          <View style={styles.messageContainer}>
+          <ScrollView style={styles.messageContainer}>
             <View style={styles.messageWrapper}>
               <View style={styles.messageBubble}>
                 <Text style={styles.messageText}>
@@ -71,7 +72,7 @@ const ChatPreview = ({ selected }) => {
                 </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </ImageBackground>
       </ImageBackground>
     </View>

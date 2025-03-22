@@ -68,7 +68,7 @@ const addEmployees = () => {
       });
       return;
     }
-
+    setLoadingState(true);
     const adminId = await AsyncStorage.getItem("id");
 
     const res = await api.post("/users/sendOTP", {
@@ -76,7 +76,11 @@ const addEmployees = () => {
       email: employeeLoginData.email,
     });
     setOtpStage(true);
+
+    setLoadingState(false);
   };
+
+  const [loading, setLoadingState] = useState(false);
   const handleVerifyOtp = async () => {
     if (!employeeLoginData.email) {
       Toast.show({
@@ -231,7 +235,11 @@ const addEmployees = () => {
           <ThemedText
             style={{ color: "white", textAlign: "center", position: "fixed" }}
           >
-            {otpStage ? "Create Employees" : "Ask for OTP"}
+            {otpStage
+              ? "Create Employees"
+              : loading
+              ? "Please wait"
+              : "Ask for OTP"}
           </ThemedText>
         </TouchableOpacity>
       </View>

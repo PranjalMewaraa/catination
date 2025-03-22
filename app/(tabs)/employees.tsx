@@ -47,10 +47,10 @@ export default function EmployeeScreen() {
     return (
       <CardContainer style={styles.cardWidget} onPress={handleCardClick}>
         <View style={styles.empHead}>
-          <Ionicons name="person-outline" style={styles.empImg} size={30} />
+          <Ionicons name="person-outline" style={styles.empImg} size={26} />
           <View>
             <ThemedText
-              type="smalltitle"
+              type="default"
               style={{
                 textOverflow: "wrap",
                 maxWidth: 80,
@@ -61,26 +61,29 @@ export default function EmployeeScreen() {
           </View>
         </View>
         <View style={styles.body}>
-          <ThemedText type="default" style={{ textOverflow: "wrap" }}>
+          <ThemedText
+            type="default"
+            style={{ maxWidth: 300, textOverflow: "wrap" }}
+          >
             {email}
           </ThemedText>
         </View>
         <View style={styles.tailEmp}>
           <Ionicons
             name="mail-outline"
-            size={24}
+            size={20}
             style={styles.bgMenu}
             onPress={() => handleModalForInfo("MAIL", email)}
           ></Ionicons>
           <Ionicons
             name="call-outline"
-            size={24}
+            size={20}
             style={styles.bgMenu}
             onPress={() => handleModalForInfo("PHONE NUMBER", contactNumber)}
           ></Ionicons>
           <Ionicons
             name="arrow-up-sharp"
-            size={24}
+            size={20}
             style={styles.bgMenuR}
           ></Ionicons>
         </View>
@@ -102,9 +105,9 @@ export default function EmployeeScreen() {
           padding: 20,
         }}
       >
-        <View style={{}}>
+        <View style={{ width: "80%" }}>
           <ThemedText type="subtitle">Your,</ThemedText>
-          <ThemedText style={{ fontSize: 44 }} type="title">
+          <ThemedText style={{ fontSize: 36 }} type="title">
             Employees
           </ThemedText>
         </View>
@@ -136,7 +139,7 @@ export default function EmployeeScreen() {
         >
           <ThemedText
             style={{ color: active ? "#fff" : "gray" }}
-            type="smalltitle"
+            type="default"
           >
             Current
           </ThemedText>
@@ -151,9 +154,9 @@ export default function EmployeeScreen() {
         >
           <ThemedText
             style={{ color: !active ? "#fff" : "gray" }}
-            type="smalltitle"
+            type="default"
           >
-            Past Employees
+            Past
           </ThemedText>
           <Ionicons
             name="hourglass-outline"
@@ -305,8 +308,8 @@ const styles = StyleSheet.create({
   cardWidget: {
     width: "50%", // ✅ Ensures two items per row with spacing
     // ✅ Adds space between rows
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
     borderRadius: 50,
     backgroundColor: Colors.cardBg,
     alignItems: "flex-start",
@@ -324,7 +327,7 @@ const styles = StyleSheet.create({
   },
   body: {
     width: "100%",
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 8,
     marginVertical: 8,
     color: "#D3d3d3",

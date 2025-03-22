@@ -74,7 +74,7 @@ export default function LeadsScreen() {
           <View>
             <ThemedText
               style={{ width: "100%", textAlign: "left" }}
-              type="subtitle"
+              type="default"
             >
               {fileName}
             </ThemedText>
@@ -312,16 +312,14 @@ export default function LeadsScreen() {
       <View
         style={{
           padding: 20,
+          width: "100%",
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <View style={{}}>
-          <ThemedText style={{ fontSize: 44 }} type="title">
-            Customers &
-          </ThemedText>
-          <ThemedText style={{ fontSize: 44 }} type="title">
+        <View style={{ width: "75%" }}>
+          <ThemedText style={{ fontSize: 36 }} type="title">
             Leads
           </ThemedText>
         </View>
@@ -363,40 +361,42 @@ export default function LeadsScreen() {
           </ThemedText>
         </TouchableOpacity>
       </View>
-      <View style={styles.serviceContainer2}>
-        <TouchableOpacity
-          style={[
-            styles.bgMenu3,
-            { backgroundColor: bulk ? "#000" : Colors.cardBg },
-            { zIndex: bulk ? 50 : 0 },
-          ]}
-          onPress={() => setbulk(true)}
-        >
-          <ThemedText
-            style={{ color: bulk ? "#fff" : "#000" }}
-            type="smalltitle"
+      {active === "leads" && (
+        <View style={styles.serviceContainer2}>
+          <TouchableOpacity
+            style={[
+              styles.bgMenu3,
+              { backgroundColor: bulk ? "#000" : Colors.cardBg },
+              { zIndex: bulk ? 50 : 0 },
+            ]}
+            onPress={() => setbulk(true)}
           >
-            Bulk Lead Files
-          </ThemedText>
-        </TouchableOpacity>
+            <ThemedText
+              style={{ color: bulk ? "#fff" : "#000" }}
+              type="smalltitle"
+            >
+              Bulk
+            </ThemedText>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.bgMenu4,
-            {
-              backgroundColor: !bulk ? "#000" : Colors.cardBg,
-            },
-          ]}
-          onPress={() => setbulk(false)}
-        >
-          <ThemedText
-            style={{ color: !bulk ? "#fff" : "#000" }}
-            type="smalltitle"
+          <TouchableOpacity
+            style={[
+              styles.bgMenu4,
+              {
+                backgroundColor: !bulk ? "#000" : Colors.cardBg,
+              },
+            ]}
+            onPress={() => setbulk(false)}
           >
-            Manual Leads
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
+            <ThemedText
+              style={{ color: !bulk ? "#fff" : "#000" }}
+              type="smalltitle"
+            >
+              Manual Leads
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      )}
       {active === "leads" && (
         <View style={{ flex: 1 }}>
           <FlatList

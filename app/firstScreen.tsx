@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/n
 import { useEffect } from "react";
 import { isAuthenticated } from "@/utils/isAuth";
 import { useRouter } from "expo-router";
+import { adjust } from "@/utils/adjustSize";
 
 export default function HomeScreen() {
   type RootStackParamList = {
@@ -110,6 +111,6 @@ const styles = StyleSheet.create({
     width: 280,
     lineHeight: 40,
     fontFamily: "LufgaMedium",
-    fontSize: 40,
+    fontSize: adjust(30),
   },
 });

@@ -158,7 +158,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   subt: {
+    width: "100%",
     display: "flex",
+    flexWrap: "wrap",
     flexDirection: "row",
     marginVertical: 24,
   },

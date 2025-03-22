@@ -73,10 +73,10 @@ const Whatsapp = () => {
   return (
     <InnerScreens icon={"help-sharp"} style={{ flex: 1, paddingHorizontal: 0 }}>
       <View style={{ padding: 20 }}>
-        <ThemedText style={{ fontSize: 44 }} type="title">
+        <ThemedText style={{ fontSize: 36 }} type="title">
           Whatsapp
         </ThemedText>
-        <ThemedText style={{ fontSize: 44 }} type="title">
+        <ThemedText style={{ fontSize: 36 }} type="title">
           Campaigns
         </ThemedText>
       </View>
@@ -114,13 +114,13 @@ const Whatsapp = () => {
               style={styles.btn}
               onPress={() => router.push("/(features)/uploadData")}
             >
-              <ThemedText type="smalltitle" style={{ textAlign: "center" }}>
+              <ThemedText type="default" style={{ textAlign: "center" }}>
                 Upload New
               </ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.btnP} onPress={handleSectionOne}>
               <ThemedText
-                type="smalltitle"
+                type="default"
                 style={{
                   textAlign: "center",
                   color: "white",

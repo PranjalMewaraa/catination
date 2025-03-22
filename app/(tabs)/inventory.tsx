@@ -68,12 +68,12 @@ export default function EmployeeScreen() {
   const EmployeeCard = ({ items }) => {
     const { societyName, _id, vacantFlats, location } = items;
     const handleCardClick = () => {
-      router.push(`(features)/${_id}`);
+      router.push(`/(features)/${_id}`);
     };
     return (
       <CardContainer style={styles.cardWidget2}>
         <View style={styles.empHead}>
-          <Ionicons name="business-outline" style={styles.empImg} size={34} />
+          <Ionicons name="business-outline" style={styles.empImg} size={20} />
           <View>
             <ThemedText type="default">{"Available"}</ThemedText>
             <ThemedText type="smalltitle">{vacantFlats}</ThemedText>
@@ -96,19 +96,19 @@ export default function EmployeeScreen() {
         <View style={styles.tailEmp}>
           <Ionicons
             name="arrow-up-sharp"
-            size={24}
+            size={18}
             style={styles.bgMenuR}
           ></Ionicons>
 
           <Ionicons
             name="pencil-outline"
-            size={24}
+            size={18}
             style={styles.bgMenu}
             onPress={() => openModal(items, "EDIT")}
           ></Ionicons>
           <Ionicons
             name="trash-outline"
-            size={24}
+            size={18}
             style={styles.bgMenu}
             onPress={() => openModal(items, "DELETE")}
           ></Ionicons>
@@ -172,23 +172,23 @@ export default function EmployeeScreen() {
         <View style={styles.tailEmp}>
           <Ionicons
             name="arrow-up-sharp"
-            size={24}
+            size={18}
             style={styles.bgMenuR}
           ></Ionicons>
           <Ionicons
             name="mail-outline"
-            size={24}
+            size={18}
             style={styles.bgMenu}
           ></Ionicons>
           <Ionicons
             name="pencil-outline"
-            size={24}
+            size={18}
             onPress={() => openModal(items, "EDIT")}
             style={styles.bgMenu}
           ></Ionicons>
           <Ionicons
             name="trash-outline"
-            size={24}
+            size={20}
             onPress={() => openModal(items, "DELETE")}
             style={styles.bgMenu}
           ></Ionicons>
@@ -245,7 +245,7 @@ export default function EmployeeScreen() {
       >
         <View>
           <ThemedText type="subtitle">manage</ThemedText>
-          <ThemedText style={{ fontSize: 44 }} type="title">
+          <ThemedText style={{ fontSize: 36 }} type="title">
             Inventory
           </ThemedText>
         </View>
@@ -281,7 +281,7 @@ export default function EmployeeScreen() {
         >
           <ThemedText
             style={{ color: active ? "#fff" : "gray" }}
-            type="smalltitle"
+            type="default"
           >
             Available
           </ThemedText>
@@ -296,7 +296,7 @@ export default function EmployeeScreen() {
         >
           <ThemedText
             style={{ color: !active ? "#fff" : "gray" }}
-            type="smalltitle"
+            type="default"
           >
             Sold Property
           </ThemedText>

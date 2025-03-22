@@ -19,6 +19,7 @@ import { Colors } from "@/constants/Colors";
 import CardContainer from "@/components/my_ui/CardContainer";
 import { isAuthenticated } from "@/utils/isAuth";
 import { setUser } from "@/store/slices/userSlice";
+import { adjust } from "@/utils/adjustSize";
 
 export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -161,7 +162,7 @@ export default function HomeScreen() {
     >
       <View style={{ padding: 20 }}>
         <ThemedText type="subtitle">Welcome to,</ThemedText>
-        <ThemedText style={{ fontSize: 44 }} type="title">
+        <ThemedText style={{ fontSize: adjust(36) }} type="title">
           Dashboard
         </ThemedText>
       </View>
