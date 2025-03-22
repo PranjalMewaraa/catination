@@ -2,7 +2,7 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = "https://realestate-backend-89xm.onrender.com/api";
+const BASE_URL = "https://api.catination.com/api";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,

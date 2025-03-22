@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: "column",
     gap: 4,
+    marginTop: 44,
   },
   leftHeader: {
     flexDirection: "row",

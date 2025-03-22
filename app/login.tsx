@@ -43,7 +43,7 @@ const login = () => {
       [field]: value,
     }));
   };
-
+  const [isLoading, setLoadingState] = useState(false);
   // Handle form submission
   const handleSubmit = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,6 +71,7 @@ const login = () => {
       console.log("Validation Errors:", errors);
       return;
     }
+    setLoadingState(true);
     try {
       dispatch(setLoading(true)); // Set loading state
       dispatch(setError(null)); // Clear previous errors
@@ -83,13 +84,14 @@ const login = () => {
       AsyncStorage.setItem("auth_token", response.token);
       AsyncStorage.setItem("id", response.user._id);
       AsyncStorage.setItem("user", JSON.stringify(response.user));
-
+      setLoading(false);
       navigation.navigate("(tabs)");
     } catch (error) {
       dispatch(setError("Login failed. Please try again.")); // Store error in Redux
       console.error("Login Error:", error);
     } finally {
       dispatch(setLoading(false)); // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -126,7 +128,9 @@ const login = () => {
         <ThemedText style={styles.pageSubtitle2}>Reset</ThemedText>
       </View>
       <Pressable style={styles.buttonOnboarding} onPress={handleSubmit}>
-        <ThemedText style={styles.buttonText}>Login Now</ThemedText>
+        <ThemedText style={styles.buttonText}>
+          {isLoading ? "Logging you in .." : "Login in"}
+        </ThemedText>
       </Pressable>
     </Container>
   );

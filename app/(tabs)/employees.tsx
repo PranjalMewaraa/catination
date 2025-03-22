@@ -95,11 +95,35 @@ export default function EmployeeScreen() {
         paddingHorizontal: 0,
       }}
     >
-      <View style={{ padding: 20 }}>
-        <ThemedText type="subtitle">Your,</ThemedText>
-        <ThemedText style={{ fontSize: 44 }} type="title">
-          Employees
-        </ThemedText>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          padding: 20,
+        }}
+      >
+        <View style={{}}>
+          <ThemedText type="subtitle">Your,</ThemedText>
+          <ThemedText style={{ fontSize: 44 }} type="title">
+            Employees
+          </ThemedText>
+        </View>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#000",
+            width: 64,
+            height: 64,
+            borderRadius: 16,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => router.push("/(features)/addEmployees")}
+        >
+          <ThemedText>
+            <Ionicons name="add" size={32} color="#fff" />
+          </ThemedText>
+        </TouchableOpacity>
       </View>
       <View style={styles.serviceContainer}>
         <TouchableOpacity
@@ -153,25 +177,7 @@ export default function EmployeeScreen() {
       ) : (
         <ThemedText style={{ paddingHorizontal: 16 }}>No Items</ThemedText>
       )}
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#000",
-          width: 64,
-          height: 64,
-          borderRadius: 16,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "absolute",
-          top: 32,
-          right: 32,
-        }}
-        onPress={() => router.push("/(features)/addEmployees")}
-      >
-        <ThemedText>
-          <Ionicons name="add" size={32} color="#fff" />
-        </ThemedText>
-      </TouchableOpacity>
+
       <Modal visible={visible} transparent={true} style={styles.infoModal}>
         <View
           style={{

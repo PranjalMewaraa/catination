@@ -297,7 +297,7 @@ export default function LeadsScreen() {
   };
   if (loading) {
     return (
-      <View>
+      <View style={{ flex: 1, backgroundColor: "" }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -309,13 +309,25 @@ export default function LeadsScreen() {
         paddingHorizontal: 0,
       }}
     >
-      <View style={{ padding: 20 }}>
-        <ThemedText style={{ fontSize: 44 }} type="title">
-          Customers &
-        </ThemedText>
-        <ThemedText style={{ fontSize: 44 }} type="title">
-          Leads
-        </ThemedText>
+      <View
+        style={{
+          padding: 20,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{}}>
+          <ThemedText style={{ fontSize: 44 }} type="title">
+            Customers &
+          </ThemedText>
+          <ThemedText style={{ fontSize: 44 }} type="title">
+            Leads
+          </ThemedText>
+        </View>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons style={styles.fab} name="add" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
       <View style={styles.serviceContainer}>
         <TouchableOpacity
@@ -386,7 +398,7 @@ export default function LeadsScreen() {
         </TouchableOpacity>
       </View>
       {active === "leads" && (
-        <>
+        <View style={{ flex: 1 }}>
           <FlatList
             data={bulk ? leadData : manualLeads}
             keyExtractor={(item) => (bulk ? item.fileName : item._id)}
@@ -396,13 +408,7 @@ export default function LeadsScreen() {
               bulk ? <FileCard {...item} /> : <EmployeeCard {...item} />
             }
           />
-          <TouchableOpacity
-            style={styles.fab}
-            onPress={() => setModalVisible(true)}
-          >
-            <Ionicons name="add" size={24} color="#fff" />
-          </TouchableOpacity>
-        </>
+        </View>
       )}
       {active === "distribute" && (
         <View style={{ flex: 1, padding: 24 }}>
@@ -532,9 +538,6 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   fab: {
-    position: "absolute",
-    bottom: 32,
-    right: 32,
     padding: 16,
     backgroundColor: "black",
     color: "white",

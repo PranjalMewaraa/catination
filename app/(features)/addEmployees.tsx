@@ -35,6 +35,7 @@ const addEmployees = () => {
     }));
   };
   const handleAskOtp = async () => {
+    console.log(employeeLoginData);
     if (!employeeLoginData.email) {
       Toast.show({
         type: "error",
@@ -67,6 +68,7 @@ const addEmployees = () => {
       });
       return;
     }
+
     const adminId = await AsyncStorage.getItem("id");
 
     const res = await api.post("/users/sendOTP", {

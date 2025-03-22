@@ -235,11 +235,40 @@ export default function EmployeeScreen() {
         paddingHorizontal: 0,
       }}
     >
-      <View style={{ paddingHorizontal: 20 }}>
-        <ThemedText type="subtitle">manage</ThemedText>
-        <ThemedText style={{ fontSize: 44 }} type="title">
-          Inventory
-        </ThemedText>
+      <View
+        style={{
+          padding: 20,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View>
+          <ThemedText type="subtitle">manage</ThemedText>
+          <ThemedText style={{ fontSize: 44 }} type="title">
+            Inventory
+          </ThemedText>
+        </View>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#000",
+            width: 64,
+            height: 64,
+            borderRadius: 16,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() =>
+            active
+              ? router.push("/(features)/addNewProperty")
+              : router.push("/(features)/addNewFlat")
+          }
+        >
+          <ThemedText>
+            <Ionicons name="add" size={32} color="#fff" />
+          </ThemedText>
+        </TouchableOpacity>
       </View>
       <View style={styles.serviceContainer}>
         <TouchableOpacity
@@ -357,29 +386,6 @@ export default function EmployeeScreen() {
       ) : (
         <ThemedText style={{ paddingHorizontal: 16 }}>No Items</ThemedText>
       )}
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#000",
-          width: 64,
-          height: 64,
-          borderRadius: 16,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "absolute",
-          bottom: 32,
-          right: 32,
-        }}
-        onPress={() =>
-          active
-            ? router.push("/(features)/addNewProperty")
-            : router.push("/(features)/addNewFlat")
-        }
-      >
-        <ThemedText>
-          <Ionicons name="add" size={32} color="#fff" />
-        </ThemedText>
-      </TouchableOpacity>
 
       <DynamicModal isVisible={modalVisible} onClose={handleClose}>
         <ModalContent
