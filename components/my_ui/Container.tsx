@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { isAuthenticated } from "@/utils/isAuth";
@@ -37,7 +37,12 @@ const Container: React.FC<MyComponentProps> = ({ children }) => {
   // if (!isAuthChecked) {
   //   return null; // Optionally, display a loading screen while checking auth status
   // }
-  return <SafeAreaView style={styles.containerParent}>{children}</SafeAreaView>;
+
+  return (
+    <SafeAreaView>
+      <ScrollView style={styles.containerParent}>{children}</ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default Container;
