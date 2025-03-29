@@ -26,7 +26,7 @@ export default function HomeScreen() {
     const checkAuth = async () => {
       const isLoggedIn = await isAuthenticated();
       if (isLoggedIn) {
-        router.replace("(tabs)"); // Redirect to tabs if authenticated
+        router.replace("/(tabs)"); // Redirect to tabs if authenticated
       }
     };
     checkAuth();
@@ -52,6 +52,9 @@ export default function HomeScreen() {
         <View>
           <Pressable style={styles.buttonOnboarding} onPress={handleGetStarted}>
             <ThemedText style={styles.buttonText}>Get Started</ThemedText>
+          </Pressable>
+          <Pressable style={styles.buttonOnboarding} onPress={handleGetStarted}>
+            <ThemedText style={styles.buttonText}>Employee Panel</ThemedText>
           </Pressable>
           <ThemedText style={styles.acknowledgement}>
             By continuing, you agree to our Terms of Service and Privacy Policy.

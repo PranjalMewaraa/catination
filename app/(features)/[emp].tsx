@@ -13,7 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import InnerScreens from "@/components/my_ui/InnerScreens";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import MenuContainer from "@/components/my_ui/MenuContainer";
 import api from "@/utils/api";
@@ -22,6 +22,12 @@ import { Colors } from "@/constants/Colors";
 import { openDialPad } from "@/utils/openDialPad";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import {
+  setActiveEmployee,
+  setError,
+  setLoading,
+  setPrevEmployee,
+} from "@/store/slices/employeeSlice";
 
 // Type definitions
 interface Employee {
@@ -68,7 +74,7 @@ const Employees = () => {
   const [dataActive, setDataActive] = useState<Lead[]>([]);
   const [dataPrev, setDataPrev] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string | null>(null);
 
   const getAssignedLeads = async () => {
     if (!emp) return;
@@ -111,7 +117,7 @@ const Employees = () => {
   const handleDelete = async () => {
     const adminId = await AsyncStorage.getItem("id");
     const res = await api.put("/employee/deleteEmployee", {
-      id: selectedDelete,
+      id: selectedDelete._id,
       adminId: adminId,
     });
 
@@ -121,11 +127,47 @@ const Employees = () => {
       type: "success",
     });
     setDeleteModal(false);
-    router.push("/(tabs)/employees");
+    Refresh();
+    router.replace("/(tabs)/employees");
   };
   const OpenDeleteModal = (id) => {
     setSelectedDelete(id);
     setDeleteModal(true);
+  };
+  const dispatch = useDispatch();
+  const FetchEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
+
+    try {
+      dispatch(setLoading(true));
+
+      const response: any = await api.post("/employee/getAllActiveEmployee", {
+        id: admin_id,
+      });
+      dispatch(setActiveEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const FetchPastEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response: any = await api.post("/employee/getAllInactiveEmployee", {
+        id: admin_id,
+      });
+      dispatch(setPrevEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
   const EmployeeCard = ({ items }: { items: Lead }) => {
     return (
@@ -172,11 +214,29 @@ const Employees = () => {
       </CardContainer>
     );
   };
+  const Refresh = () => {
+    FetchEmployee();
+    FetchPastEmployee();
+  };
+
+  const retrieveEmployee = async () => {
+    const res = await api.put("/employee/recoverEmployee", {
+      id: selectedDelete._id,
+    });
+    console.log(res);
+    Toast.show({
+      type: "success",
+      text1: "Employee recovered successfully",
+    });
+    setDeleteModal(false);
+    Refresh();
+    router.replace("/(tabs)/employees");
+  };
 
   const [section, setSection] = useState<"NEW" | "ACTIVE" | "PAST">("NEW");
 
   return (
-    <InnerScreens name={"Employee Information"} icon={"star-outline"}>
+    <InnerScreens name={"Employee Information"}>
       <ScrollView>
         <View style={styles.employeeCard}>
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
@@ -219,7 +279,7 @@ const Employees = () => {
               </MenuContainer>
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={() => OpenDeleteModal(employee._id)}
+                onPress={() => OpenDeleteModal(employee)}
               >
                 <Ionicons name="trash-outline" color={"#fff"} size={28} />
               </TouchableOpacity>
@@ -259,9 +319,9 @@ const Employees = () => {
           </View>
 
           {isLoading && <ActivityIndicator size="large" color="#000" />}
-          {error && <ThemedText style={styles.errorText}>{error}</ThemedText>}
+          {errors && <ThemedText style={styles.errorText}>{errors}</ThemedText>}
 
-          {!isLoading && !error && (
+          {!isLoading && !errors && (
             <FlatList
               data={
                 section === "NEW"
@@ -377,17 +437,23 @@ const Employees = () => {
               }}
             >
               <ThemedText type="smalltitle">
-                Are you sure you want to delete this employee
+                {selectedDelete.employmentStatus === "inactive"
+                  ? "Are you sure , you want to recover this employee?"
+                  : "Are you sure you want to delete this employee"}
               </ThemedText>
               <TouchableOpacity
                 style={{ width: "100%", padding: 16, backgroundColor: "#000" }}
-                onPress={() => handleDelete()}
+                onPress={() =>
+                  selectedDelete.employmentStatus === "inactive"
+                    ? retrieveEmployee()
+                    : handleDelete()
+                }
               >
                 <ThemedText
                   type="smalltitle"
                   style={{ color: "#fff", textAlign: "center" }}
                 >
-                  DELETE
+                  YES
                 </ThemedText>
               </TouchableOpacity>
               <TouchableOpacity

@@ -4,18 +4,21 @@ import {
   StyleSheet,
   Text,
   View,
+  RefreshControl,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { isAuthenticated } from "@/utils/isAuth";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface MyComponentProps {
   children: React.ReactNode;
-  style?: object; // Define style prop properly
+  style?: object;
+  onRefresh?: () => Promise<void> | void; // Added onRefresh prop
 }
 
 type RootStackParamList = {
@@ -26,11 +29,16 @@ type RootStackParamList = {
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, "signup">;
 
-const AuthContainer: React.FC<MyComponentProps> = ({ children, style }) => {
+const AuthContainer: React.FC<MyComponentProps> = ({
+  children,
+  style,
+  onRefresh,
+}) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProps>();
-
+  const [role_user, setRole] = useState("");
   useEffect(() => {
     const checkAuthStatus = async () => {
       const status: boolean = await isAuthenticated();
@@ -38,11 +46,33 @@ const AuthContainer: React.FC<MyComponentProps> = ({ children, style }) => {
         navigation.navigate("login");
       }
       setIsLoggedIn(status);
+      const role = await AsyncStorage.getItem("role");
+
+      if (role === "employee") {
+        router.replace("/(employee)");
+      }
       setIsAuthChecked(true);
     };
 
     checkAuthStatus();
   }, []);
+
+  // Handle refresh action
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (onRefresh) {
+        await onRefresh();
+      }
+      // Optionally re-check auth status on refresh
+      const status = await isAuthenticated();
+      setIsLoggedIn(status);
+    } catch (error) {
+      console.error("Refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [onRefresh]);
 
   if (!isAuthChecked) {
     return null; // Optionally, display a loading spinner or placeholder
@@ -56,6 +86,14 @@ const AuthContainer: React.FC<MyComponentProps> = ({ children, style }) => {
       }}
       enableOnAndroid={true}
       style={[styles.containerParent, style]}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={["#9Bd35A", "#689F38"]}
+          tintColor="#689F38"
+        />
+      }
     >
       {children}
       <Toast />

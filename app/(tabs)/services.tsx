@@ -87,7 +87,7 @@ export default function ServicesScreen() {
 
           <ThemedText
             style={{ width: "100%", textAlign: "left", marginTop: 16 }}
-            type="subtitle"
+            type="smalltitle"
           >
             {title}
           </ThemedText>
@@ -97,6 +97,7 @@ export default function ServicesScreen() {
               textAlign: "left",
               color: "gray",
               marginTop: 4,
+              fontSize: 14,
             }}
           >
             {content}

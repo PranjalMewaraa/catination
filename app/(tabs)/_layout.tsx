@@ -14,16 +14,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { ThemedText } from "@/components/ThemedText";
-
-// Assuming you have a logout utility function
-import { isAuthenticated, logout as performLogout } from "@/utils/isAuth"; // Adjust this import based on your auth logic
+import { isAuthenticated, logout as performLogout } from "@/utils/isAuth";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { Colors } from "@/constants/Colors";
-import CardContainer from "@/components/my_ui/CardContainer";
 import MenuContainer from "@/components/my_ui/MenuContainer";
 import Container from "@/components/my_ui/Container";
 import { useSelector } from "react-redux";
-import store, { RootState } from "@/store/store";
+import { RootState } from "@/store/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function TabLayout() {
   type RootStackParamList = {
@@ -33,55 +31,46 @@ function TabLayout() {
   };
   const navigation = useNavigation<NavigationProps>();
 
-  // Define Navigation Type
   type NavigationProps = NativeStackNavigationProp<
     RootStackParamList,
     "signup"
   >;
 
-  // Logout function
   const handleLogout = async () => {
     try {
-      await performLogout(); // Your logout logic (e.g., clear tokens, Redux state, etc.)
-      navigation.navigate("login"); // Redirect to login screen after logout
+      await performLogout();
+      navigation.navigate("login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Optionally show an error message to the user
     }
   };
-  const { user, loading, error } = useSelector(
-    (state: RootState) => state.user
-  );
+
+  const { user } = useSelector((state: RootState) => state.user);
+
   const options_navigation_drawer = [
     { name: "Dashboard", route: "index", icon: "home-outline" },
-    {
-      name: "Our Services",
-      route: "services",
-      icon: "code-working-outline",
-    },
+    { name: "Our Services", route: "services", icon: "code-working-outline" },
     { name: "Employees", route: "employees", icon: "person-outline" },
     { name: "Leads", route: "leads", icon: "people-outline" },
-    {
-      name: "Inventory",
-      route: "inventory",
-      icon: "apps-outline",
-    },
-
+    { name: "Inventory", route: "inventory", icon: "apps-outline" },
     {
       name: "Log Out",
       route: "logout",
       icon: "log-out-outline",
       action: handleLogout,
-    }, // Added action for logout
+    },
   ];
-  const [isLoggedIn, setIsLoggedIn] = useState(null); // Default state to check if logged in
-  const [isAuthChecked, setIsAuthChecked] = useState(false); // To check if auth state is checked
+
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [ROLE_USER, setRoleUser] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const status: any = await isAuthenticated();
-
+      const status = await isAuthenticated();
+      const savedRole = await AsyncStorage.getItem("role");
       setIsLoggedIn(status);
+      setRoleUser(savedRole);
       setIsAuthChecked(true);
     };
 
@@ -89,10 +78,55 @@ function TabLayout() {
   }, []);
 
   const handleGetStarted = () => {
-    router.push("/login"); // Navigate to login when button is pressed
+    router.push("/login");
   };
 
-  return isLoggedIn ? (
+  const handleGetStartedEmployee = () => {
+    router.push("/employeeLogin");
+  };
+
+  console.log("check", ROLE_USER);
+
+  if (!isAuthChecked) return null; // Loading/splash
+
+  if (!isLoggedIn) {
+    return (
+      <Container>
+        <Image
+          style={styles.onboardingImage}
+          source={require("../../assets/images/onboarding/workspace.png")}
+        />
+        <View style={styles.contentContainer}>
+          <View style={styles.textContainer}>
+            <ThemedText style={styles.pointer}>Catination CRM</ThemedText>
+            <ThemedText style={styles.mainText}>
+              Everything you need for your sales, in your pocket
+            </ThemedText>
+          </View>
+          <View>
+            <Pressable
+              style={styles.buttonOnboarding}
+              onPress={handleGetStarted}
+            >
+              <ThemedText style={styles.buttonText}>Get Started</ThemedText>
+            </Pressable>
+            <Pressable
+              style={styles.buttonOnboarding2}
+              onPress={handleGetStartedEmployee}
+            >
+              <ThemedText style={styles.buttonText}>Employee Panel</ThemedText>
+            </Pressable>
+            <ThemedText style={styles.acknowledgement}>
+              By continuing, you agree to our Terms of Service and Privacy
+              Policy.
+            </ThemedText>
+          </View>
+        </View>
+      </Container>
+    );
+  }
+
+  return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#fff" }}>
       <Drawer
         screenOptions={{
@@ -153,29 +187,6 @@ function TabLayout() {
         ))}
       </Drawer>
     </GestureHandlerRootView>
-  ) : (
-    <Container>
-      <Image
-        style={styles.onboardingImage}
-        source={require("../../assets/images/onboarding/workspace.png")}
-      />
-      <View style={styles.contentContainer}>
-        <View style={styles.textContainer}>
-          <ThemedText style={styles.pointer}>Catination CRM</ThemedText>
-          <ThemedText style={styles.mainText}>
-            Everything you need for your sales, in your pocket
-          </ThemedText>
-        </View>
-        <View>
-          <Pressable style={styles.buttonOnboarding} onPress={handleGetStarted}>
-            <ThemedText style={styles.buttonText}>Get Started</ThemedText>
-          </Pressable>
-          <ThemedText style={styles.acknowledgement}>
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-          </ThemedText>
-        </View>
-      </View>
-    </Container>
   );
 }
 
@@ -194,16 +205,6 @@ const CustomHeaderForDrawer = () => {
           </TouchableOpacity>
         </MenuContainer>
         <View style={styles.headerSide}>
-          {/* <MenuContainer style={styles.bgMenu}>
-            <TouchableOpacity onPress={() => alert("Chat Clicked!")}>
-              <Ionicons name="chatbox-outline" size={24} color="black" />
-            </TouchableOpacity>
-          </MenuContainer>
-          <MenuContainer style={styles.bgMenu}>
-            <TouchableOpacity onPress={() => alert("Notifications Clicked!")}>
-              <Ionicons name="notifications-outline" size={24} color="black" />
-            </TouchableOpacity>
-          </MenuContainer> */}
           <MenuContainer style={styles.bgMenu}>
             <TouchableOpacity
               onPress={() => router.push("/(features)/adminProfile")}
@@ -217,7 +218,7 @@ const CustomHeaderForDrawer = () => {
   );
 };
 
-// User Profile in Drawer
+// Drawer User Header
 const InsideHeader = (user) => {
   return (
     <SafeAreaView>
@@ -241,6 +242,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 16,
     marginBottom: 4,
+    fontSize: 14,
   },
   buttonOnboarding: {
     width: "100%",
@@ -248,7 +250,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 46,
     backgroundColor: "#9989F1",
-    marginBottom: 4,
+  },
+  buttonOnboarding2: {
+    width: "100%",
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 46,
+    backgroundColor: "#000000",
   },
   buttonText: {
     fontSize: 20,
@@ -321,7 +329,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: 80,
     paddingHorizontal: 20,
-
     backgroundColor: "#EDF0EA",
   },
   headerSide: {

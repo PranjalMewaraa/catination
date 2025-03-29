@@ -3,28 +3,30 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   RefreshControl,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { isAuthenticated } from "@/utils/isAuth";
 import { router, useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import MenuContainer from "./MenuContainer";
-import { Ionicons } from "@expo/vector-icons";
-import { ThemedText } from "../ThemedText";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import { ThemedText } from "../ThemedText";
+import MenuContainer from "./MenuContainer";
 
 interface MyComponentProps {
   children: React.ReactNode;
   style?: object;
-  name?: string; // Fixed String to string
-  icon?: string; // Fixed String to string
-  onRefresh?: () => Promise<void> | void; // Added onRefresh prop
+  name: String;
+  icon: String;
+  onRefresh?: () => Promise<void> | void;
+  handleIconAction?: () => Promise<void> | void; // Added onRefresh prop
 }
 
 type RootStackParamList = {
@@ -35,37 +37,40 @@ type RootStackParamList = {
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, "signup">;
 
-const InnerScreens: React.FC<MyComponentProps> = ({
+const EmpAuthContainer: React.FC<MyComponentProps> = ({
   children,
   style,
+  onRefresh,
   name,
   icon,
-  onRefresh,
+  handleIconAction,
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [role_user, setRole] = useState("");
   const navigation = useNavigation<NavigationProps>();
-  const [role_user, setRole] = useState();
+
   useEffect(() => {
     const checkAuthStatus = async () => {
       const status: boolean = await isAuthenticated();
       if (!status) {
         navigation.navigate("login");
       }
-
-      setIsLoggedIn(status);
       const role = await AsyncStorage.getItem("role");
 
-      if (role === "employee") {
-        router.replace("/(employee)");
+      if (role === "admin") {
+        router.replace("/(tabs)");
       }
+      setRole(role);
+      setIsLoggedIn(status);
       setIsAuthChecked(true);
     };
 
     checkAuthStatus();
   }, []);
 
+  // Handle refresh action
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -91,7 +96,6 @@ const InnerScreens: React.FC<MyComponentProps> = ({
       resetScrollToCoords={{ x: 0, y: 0 }}
       contentContainerStyle={{
         justifyContent: "center",
-        paddingTop: 42,
       }}
       enableOnAndroid={true}
       style={[styles.containerParent, style]}
@@ -99,17 +103,20 @@ const InnerScreens: React.FC<MyComponentProps> = ({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          colors={["#9Bd35A", "#689F38"]} // Optional: customize refresh indicator colors
-          tintColor="#689F38" // Optional: iOS
+          colors={["#9Bd35A", "#689F38"]}
+          tintColor="#689F38"
         />
       }
     >
       <View style={styles.header}>
         <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
-          <MenuContainer style={styles.bgMenu}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back-sharp" size={24} color="black" />
-            </TouchableOpacity>
+          <MenuContainer style={styles.bgMenu2}>
+            <Image
+              source={require("../../assets/images/catination.png")}
+              width={16}
+              resizeMode="contain"
+              style={styles.Img}
+            ></Image>
           </MenuContainer>
           <View style={styles.headerTitle}>
             <ThemedText
@@ -122,19 +129,25 @@ const InnerScreens: React.FC<MyComponentProps> = ({
         </View>
         {icon && (
           <MenuContainer style={styles.bgMenu}>
-            <TouchableOpacity>
-              <Ionicons name={icon} size={24} color="black" />
-            </TouchableOpacity>
+            {handleIconAction ? (
+              <TouchableOpacity onPress={handleIconAction}>
+                <Ionicons name={icon} size={24} color="black" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity>
+                <Ionicons name={icon} size={24} color="black" />
+              </TouchableOpacity>
+            )}
           </MenuContainer>
         )}
       </View>
-      <Toast />
       {children}
+      <Toast />
     </KeyboardAwareScrollView>
   );
 };
 
-export default InnerScreens;
+export default EmpAuthContainer;
 
 const styles = StyleSheet.create({
   containerParent: {
@@ -149,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 28,
     padding: 16,
     justifyContent: "space-between",
   },
@@ -160,5 +173,10 @@ const styles = StyleSheet.create({
   bgMenu: {
     padding: 16,
     borderRadius: 100,
+  },
+  bgMenu2: {},
+  Img: {
+    width: 56,
+    height: 56,
   },
 });

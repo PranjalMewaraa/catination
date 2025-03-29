@@ -23,6 +23,7 @@ import { openDialPad } from "@/utils/openDialPad";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import { logout as performLogout } from "@/utils/isAuth";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Type definitions
 interface Employee {
@@ -119,7 +120,13 @@ const Employees = () => {
   return (
     <InnerScreens name={"Admin Information"} icon={"star-outline"}>
       <ScrollView>
-        <View style={styles.employeeCard}>
+        <LinearGradient
+          colors={["#E5E4D9", "#E4E3D8"]}
+          // Light to darker gray
+          start={{ x: 0, y: 0 }} // Top-left
+          end={{ x: 0, y: 1 }} // Bottom-right
+          style={styles.employeeCard}
+        >
           {/* <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <TouchableOpacity
               onPress={() => router.push(`/(features)/updateEmployee`)}
@@ -158,9 +165,9 @@ const Employees = () => {
               </MenuContainer>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
-        <View style={styles.leadsContainer}>
+        <View style={styles.leadsContainer2}>
           {/* <View style={styles.leadsHeader}>
             <ThemedText style={{ paddingHorizontal: 16 }} type="title">
               Assigned Leads
@@ -180,7 +187,7 @@ const Employees = () => {
           >
             <ThemedText
               style={{ textAlign: "center", color: "white" }}
-              type="title"
+              type="default"
             >
               Log out
             </ThemedText>
@@ -303,12 +310,24 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
   },
   leadsContainer: {
-    minHeight: 100,
     width: "100%",
     backgroundColor: "#F5F6EC",
     borderRadius: 36,
-    padding: 16,
+    padding: 20,
     paddingVertical: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  leadsContainer2: {
+    width: "100%",
+    backgroundColor: "#E0E1D7",
+    borderRadius: 36,
+    padding: 20,
+    paddingVertical: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   leadsHeader: {
     flexDirection: "row",

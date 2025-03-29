@@ -167,7 +167,6 @@ export default function LeadsScreen() {
 
   useEffect(() => {
     handleManualLead();
-    callMetaLeads();
   }, []);
   const [bulk, setbulk] = useState(true);
 
@@ -178,11 +177,6 @@ export default function LeadsScreen() {
     setVisible(true);
     setModalData(data);
     setModalAction(action);
-  };
-
-  const callMetaLeads = async () => {
-    const res = await api.post("/metaleads/metaLeads");
-    console.log(res);
   };
   const EmployeeCard = ({
     name,
@@ -305,7 +299,6 @@ export default function LeadsScreen() {
       </CardContainer>
     );
   };
-
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: "" }}>
@@ -355,30 +348,27 @@ export default function LeadsScreen() {
             Leads
           </ThemedText>
         </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          style={[
-            styles.bgMenu4,
-            {
-              backgroundColor: active === "MetaLeads" ? "#000" : Colors.cardBg,
-            },
-          ]}
-          onPress={() => setActive("MetaLeads")}
-        >
-          <ThemedText
-            style={{ color: active === "MetaLeads" ? "#fff" : "#000" }}
-            type="smalltitle"
-          >
-            Meta Leads
-          </ThemedText>
-        </TouchableOpacity> */}
-
         <TouchableOpacity
           style={[
             styles.bgMenu4,
             {
               backgroundColor: active === "distribute" ? "#000" : Colors.cardBg,
-              zIndex: active === "distribute" ? 20 : 9,
+            },
+          ]}
+          onPress={() => setActive("distribute")}
+        >
+          <ThemedText
+            style={{ color: active === "distribute" ? "#fff" : "#000" }}
+            type="smalltitle"
+          >
+            Distribute
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.bgMenu4,
+            {
+              backgroundColor: active === "distribute" ? "#000" : Colors.cardBg,
             },
           ]}
           onPress={() => setActive("distribute")}
@@ -443,6 +433,7 @@ export default function LeadsScreen() {
       {active === "distribute" && (
         <View style={{ flex: 1, padding: 24 }}>
           <ThemedText type="subtitle" style={{ marginBottom: 16 }}>
+            {" "}
             Distribute Leads to Employee
           </ThemedText>
 
@@ -479,75 +470,73 @@ export default function LeadsScreen() {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
       >
-        <ScrollView nestedScrollEnabled style={{ flex: 1, width: "100%" }}>
+        <View style={styles.modal}>
+          <ThemedText style={styles.pageTitle}>Add a Lead!</ThemedText>
           <View style={styles.modal}>
-            <ThemedText style={styles.pageTitle}>Add a Lead!</ThemedText>
-            <View style={styles.modal}>
-              <InputBox
-                id="name"
-                placeholder="enter name"
-                inputMode="text"
-                value={lead.name}
-                onChangeText={(text) => handleInputChange("name", text)}
-              />
-              <InputBox
-                id="phone"
-                placeholder="enter phone"
-                inputMode="tel" // Changed to "tel" for phone numbers
-                value={lead.phone}
-                onChangeText={(text) => handleInputChange("phone", text)}
-              />
-              <InputBox
-                id="email"
-                placeholder="enter email"
-                inputMode="email"
-                value={lead.email}
-                onChangeText={(text) => handleInputChange("email", text)}
-              />
-              <InputBox
-                id="source"
-                placeholder="enter source (call /email /msg etc)"
-                inputMode="text"
-                value={lead.source}
-                onChangeText={(text) => handleInputChange("source", text)}
-              />
-              <InputBox
-                id="source"
-                placeholder="enter city / location"
-                inputMode="text"
-                value={lead.location}
-                onChangeText={(text) => handleInputChange("location", text)}
-              />
-              <InputBox
-                id="assignedTo"
-                placeholder="enter query (desc)"
-                inputMode="text"
-                value={lead.property} // Using "property" for query since no "query" field exists in state
-                onChangeText={(text) => handleInputChange("property", text)}
-              />
-              <MultiSelectDropdown
-                data={empsel}
-                title="Assign lead to employee"
-                onSelectionChange={handleSelectionChange}
-                selectedItems={lead.assignedTo ? [lead.assignedTo] : []} // Assuming it accepts an array
-              />
-              <TouchableOpacity
-                style={{
-                  padding: 16,
-                  backgroundColor: "#000",
-                  borderRadius: 8,
-                  width: "100%",
-                  marginTop: 16,
-                }}
-                onPress={handleSaveLead}
-              >
-                <ThemedText style={{ color: "#fff", textAlign: "center" }}>
-                  Save Lead Info
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
+            <InputBox
+              id="name"
+              placeholder="enter name"
+              inputMode="text"
+              value={lead.name}
+              onChangeText={(text) => handleInputChange("name", text)}
+            />
+            <InputBox
+              id="phone"
+              placeholder="enter phone"
+              inputMode="tel" // Changed to "tel" for phone numbers
+              value={lead.phone}
+              onChangeText={(text) => handleInputChange("phone", text)}
+            />
+            <InputBox
+              id="email"
+              placeholder="enter email"
+              inputMode="email"
+              value={lead.email}
+              onChangeText={(text) => handleInputChange("email", text)}
+            />
+            <InputBox
+              id="source"
+              placeholder="enter source (call /email /msg etc)"
+              inputMode="text"
+              value={lead.source}
+              onChangeText={(text) => handleInputChange("source", text)}
+            />
+            <InputBox
+              id="source"
+              placeholder="enter city / location"
+              inputMode="text"
+              value={lead.location}
+              onChangeText={(text) => handleInputChange("location", text)}
+            />
+            <InputBox
+              id="assignedTo"
+              placeholder="enter query (desc)"
+              inputMode="text"
+              value={lead.property} // Using "property" for query since no "query" field exists in state
+              onChangeText={(text) => handleInputChange("property", text)}
+            />
+            <MultiSelectDropdown
+              data={empsel}
+              title="Assign lead to employee"
+              onSelectionChange={handleSelectionChange}
+              selectedItems={lead.assignedTo ? [lead.assignedTo] : []} // Assuming it accepts an array
+            />
+            <TouchableOpacity
+              style={{
+                padding: 16,
+                backgroundColor: "#000",
+                borderRadius: 8,
+                width: "100%",
+                marginTop: 16,
+              }}
+              onPress={handleSaveLead}
+            >
+              <ThemedText style={{ color: "#fff", textAlign: "center" }}>
+                Save Lead Info
+              </ThemedText>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
       </DynamicModal>
     </AuthContainer>
   );
@@ -558,8 +547,9 @@ const styles = StyleSheet.create({
   modal: {
     flex: 1,
     width: "100%",
+
     flexDirection: "column",
-    gap: 2,
+    gap: 4,
     alignItems: "flex-start",
     justifyContent: "flex-start",
   },
@@ -644,22 +634,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    zIndex: 10,
     backgroundColor: Colors.cardBg,
     transform: [{ translateX: -16 }],
-  },
-  bgMenu5: {
-    padding: 16,
-    paddingHorizontal: 20,
-    borderRadius: 45,
-    borderWidth: 2,
-    borderColor: "#fff",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-
-    backgroundColor: Colors.cardBg,
-    transform: [{ translateX: -24 }],
   },
   serviceContainer: {
     flexDirection: "row",

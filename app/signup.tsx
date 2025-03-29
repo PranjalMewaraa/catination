@@ -1,4 +1,11 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import Container from "@/components/my_ui/Container";
 import { ThemedText } from "@/components/ThemedText";
@@ -51,52 +58,54 @@ const Signup = () => {
 
   return (
     <Container>
-      <View style={styles.emptyBox}></View>
-      <ThemedText style={styles.pageTitle}>Hey,</ThemedText>
-      <ThemedText style={styles.pageTitle}>Create a Account !</ThemedText>
-      <View style={styles.subt}>
-        <ThemedText style={styles.pageSubtitle}>
-          I am already a User /
-        </ThemedText>
-        <Pressable onPress={() => navigation.navigate("login")}>
-          <ThemedText style={styles.pageSubtitle2}>Login Account</ThemedText>
+      <ScrollView>
+        <View style={styles.emptyBox}></View>
+        <ThemedText style={styles.pageTitle}>Hey,</ThemedText>
+        <ThemedText style={styles.pageTitle}>Create a Account !</ThemedText>
+        <View style={styles.subt}>
+          <ThemedText style={styles.pageSubtitle}>
+            I am already a User /
+          </ThemedText>
+          <Pressable onPress={() => navigation.navigate("login")}>
+            <ThemedText style={styles.pageSubtitle2}>Login Account</ThemedText>
+          </Pressable>
+        </View>
+        <View>
+          <InputBox
+            id="name"
+            placeholder="name"
+            inputMode="text"
+            onChangeText={(text) => handleInputChange("name", text)}
+          />
+          <InputBox
+            id="email"
+            placeholder="email"
+            inputMode="email"
+            onChangeText={(text) => handleInputChange("email", text)}
+          />
+          <InputBox
+            id="password"
+            placeholder="password"
+            inputMode="text"
+            secureTextEntry={true}
+            onChangeText={(text) => handleInputChange("password", text)}
+          />
+          <InputBox
+            id="cnf-password"
+            placeholder="confirm password"
+            inputMode="text"
+            secureTextEntry={true}
+            onChangeText={(text) => handleInputChange("confirmPassword", text)}
+          />
+        </View>
+        <View style={styles.subt}>
+          <ThemedText style={styles.pageSubtitle}>Forgot Password /</ThemedText>
+          <ThemedText style={styles.pageSubtitle2}>Reset</ThemedText>
+        </View>
+        <Pressable style={styles.buttonOnboarding} onPress={Signup}>
+          <ThemedText style={styles.buttonText}>Signup </ThemedText>
         </Pressable>
-      </View>
-      <View>
-        <InputBox
-          id="name"
-          placeholder="name"
-          inputMode="text"
-          onChangeText={(text) => handleInputChange("name", text)}
-        />
-        <InputBox
-          id="email"
-          placeholder="email"
-          inputMode="email"
-          onChangeText={(text) => handleInputChange("email", text)}
-        />
-        <InputBox
-          id="password"
-          placeholder="password"
-          inputMode="text"
-          secureTextEntry={true}
-          onChangeText={(text) => handleInputChange("password", text)}
-        />
-        <InputBox
-          id="cnf-password"
-          placeholder="confirm password"
-          inputMode="text"
-          secureTextEntry={true}
-          onChangeText={(text) => handleInputChange("confirmPassword", text)}
-        />
-      </View>
-      <View style={styles.subt}>
-        <ThemedText style={styles.pageSubtitle}>Forgot Password /</ThemedText>
-        <ThemedText style={styles.pageSubtitle2}>Reset</ThemedText>
-      </View>
-      <Pressable style={styles.buttonOnboarding} onPress={Signup}>
-        <ThemedText style={styles.buttonText}>Signup </ThemedText>
-      </Pressable>
+      </ScrollView>
     </Container>
   );
 };

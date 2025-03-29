@@ -28,21 +28,22 @@ const Whatsapp = () => {
   const [selectedTemp, setSelectedTemp] = useState([]);
   const [files, setFiles] = useState([]);
   const router = useRouter();
-  useEffect(() => {
-    const getWhatsappTemplates = async () => {
-      const res = await api.get("/whatsappTemplate/getTemplates");
-      const data = res.data.data;
-      const jsonData = data;
-      setWhatsappTemplates(JSON.parse(JSON.stringify(jsonData, null, 2)));
-    };
-    const getExcelFiles = async () => {
-      const adminId = await AsyncStorage.getItem("id");
-      const res = await api.post("/data/getAllData", {
-        id: adminId,
-      });
 
-      setFiles(res);
-    };
+  const getWhatsappTemplates = async () => {
+    const res = await api.get("/whatsappTemplate/getTemplates");
+    const data = res.data.data;
+    const jsonData = data;
+    setWhatsappTemplates(JSON.parse(JSON.stringify(jsonData, null, 2)));
+  };
+  const getExcelFiles = async () => {
+    const adminId = await AsyncStorage.getItem("id");
+    const res = await api.post("/data/getAllData", {
+      id: adminId,
+    });
+
+    setFiles(res);
+  };
+  useEffect(() => {
     getWhatsappTemplates();
     getExcelFiles();
   }, []);
@@ -70,8 +71,17 @@ const Whatsapp = () => {
     }
   };
 
+  const Refresh = () => {
+    getWhatsappTemplates();
+    getExcelFiles();
+  };
+
   return (
-    <InnerScreens icon={"help-sharp"} style={{ flex: 1, paddingHorizontal: 0 }}>
+    <InnerScreens
+      icon={"help-sharp"}
+      style={{ flex: 1, paddingHorizontal: 0 }}
+      onRefresh={Refresh}
+    >
       <View style={{ padding: 20 }}>
         <ThemedText style={{ fontSize: 36 }} type="title">
           Whatsapp

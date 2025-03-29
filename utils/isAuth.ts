@@ -1,6 +1,7 @@
 // utils/isAuth.js
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 // Key for storing the authentication token in AsyncStorage
 const AUTH_TOKEN_KEY = "auth_token";
@@ -29,7 +30,8 @@ export const login = async (token: string) => {
 // Function to log the user out (e.g., remove the authentication token)
 export const logout = async () => {
   try {
-    await AsyncStorage.removeItem(AUTH_TOKEN_KEY); // Remove the token
+    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+    router.dismissAll(); // Remove the token
     console.log("User logged out");
   } catch (error) {
     console.error("Error during logout", error);

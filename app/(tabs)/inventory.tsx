@@ -53,6 +53,11 @@ export default function EmployeeScreen() {
     fetchInventorySold();
   }, []);
 
+  const Refresh = () => {
+    fetchInventory();
+    fetchInventorySold();
+  };
+
   const [selected, setSelected] = useState(null);
   const [selectedAction, setSelectedAction] = useState("EDIT");
   const handleClose = () => {
@@ -234,6 +239,7 @@ export default function EmployeeScreen() {
         flex: 1,
         paddingHorizontal: 0,
       }}
+      onRefresh={Refresh}
     >
       <View
         style={{

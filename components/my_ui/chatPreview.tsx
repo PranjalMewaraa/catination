@@ -44,7 +44,11 @@ const ChatPreview = ({ selected }) => {
           </View>
 
           {/* Chat Message Section */}
-          <ScrollView style={styles.messageContainer}>
+          <ScrollView
+            style={styles.messageContainer}
+            contentContainerStyle={{ justifyContent: "flex-end" }}
+            nestedScrollEnabled
+          >
             <View style={styles.messageWrapper}>
               <View style={styles.messageBubble}>
                 <Text style={styles.messageText}>
@@ -113,7 +117,6 @@ const styles = StyleSheet.create({
   messageContainer: {
     flex: 1,
     padding: 16,
-    justifyContent: "flex-end",
   },
   messageWrapper: {
     flexDirection: "column",

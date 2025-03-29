@@ -14,6 +14,7 @@ import { Provider } from "react-redux";
 import store from "@/store/store";
 import Toast from "react-native-toast-message";
 import { isAuthenticated } from "@/utils/isAuth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -61,6 +62,9 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack initialRouteName={isLoggedIn ? "(tabs)" : "firstScreen"}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+          <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+
           <Stack.Screen
             name="(features)/[emp]"
             options={{ headerShown: false }}
@@ -105,14 +109,16 @@ export default function RootLayout() {
             name="(features)/Helpers/WhatsappTemplate/CreateTemplate"
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="signup" options={{ headerShown: false }} />
-          <Stack.Screen name="(onboard)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
           <Stack.Screen
             name="(features)/adminProfile"
             options={{ headerShown: false }}
-          />{" "}
+          />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="employeeLogin" options={{ headerShown: false }} />
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboard)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+
           <Stack.Screen name="firstScreen" options={{ headerShown: false }} />
         </Stack>
         <StatusBar backgroundColor="transparent" translucent={true} />

@@ -80,47 +80,49 @@ export default function HomeScreen() {
   useEffect(() => {
     getUser();
   }, []);
+  const FetchEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response: any = await api.post("/employee/getAllActiveEmployee", {
+        id: admin_id,
+      });
+      dispatch(setActiveEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const FetchPastEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response: any = await api.post("/employee/getAllInactiveEmployee", {
+        id: admin_id,
+      });
+      dispatch(setPrevEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
   useEffect(() => {
-    const FetchEmployee = async () => {
-      const admin_id = (await AsyncStorage.getItem("id")) || user._id;
-
-      try {
-        dispatch(setLoading(true));
-        dispatch(setError(null));
-        const response: any = await api.post("/employee/getAllActiveEmployee", {
-          id: admin_id,
-        });
-        dispatch(setActiveEmployee(response));
-      } catch (error) {
-        dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
-        console.error("Employee Fetch Error:", error);
-      } finally {
-        dispatch(setLoading(false));
-      }
-    };
-    const FetchPastEmployee = async () => {
-      const admin_id = (await AsyncStorage.getItem("id")) || user._id;
-
-      try {
-        dispatch(setLoading(true));
-        dispatch(setError(null));
-        const response: any = await api.post(
-          "/employee/getAllInactiveEmployee",
-          {
-            id: admin_id,
-          }
-        );
-        dispatch(setPrevEmployee(response));
-      } catch (error) {
-        dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
-        console.error("Employee Fetch Error:", error);
-      } finally {
-        dispatch(setLoading(false));
-      }
-    };
     FetchEmployee();
     FetchPastEmployee();
   }, []);
+
+  const Refresh = () => {
+    FetchEmployee();
+    FetchPastEmployee();
+  };
 
   const WidgetCard = ({ title, content, coloricon }) => {
     return (
@@ -132,33 +134,39 @@ export default function HomeScreen() {
             color={"white"}
             style={[styles.icon, { backgroundColor: coloricon }]}
           />
-          <ThemedText style={{ flexWrap: "wrap", width: 100 }}>
+          <ThemedText style={{ flexWrap: "wrap", width: 100, fontSize: 14 }}>
             {title}
           </ThemedText>
         </View>
         <View style={{ marginVertical: 16 }}>
-          <ThemedText type="title">{content}</ThemedText>
+          <ThemedText type="smalltitle">{content}</ThemedText>
         </View>
       </CardContainer>
     );
   };
   const [isLoggedIn, setIsLoggedIn] = useState(null); // Default state to check if logged in
   const [isAuthChecked, setIsAuthChecked] = useState(false); // To check if auth state is checked
-
+  const [role_user, setRole] = useState("");
   useEffect(() => {
     const checkAuthStatus = async () => {
       const status: any = await isAuthenticated();
-
+      const role = await AsyncStorage.getItem("role");
       setIsLoggedIn(status);
+      setRole(role);
       setIsAuthChecked(true);
     };
 
     checkAuthStatus();
   }, []);
 
+  if (!isAuthChecked) {
+    return null;
+  }
+
   return (
     <AuthContainer
       style={{ flex: 1, backgroundColor: "#EDF0EA", paddingHorizontal: 0 }}
+      onRefresh={Refresh}
     >
       <View style={{ padding: 20 }}>
         <ThemedText type="subtitle">Welcome to,</ThemedText>
@@ -169,18 +177,13 @@ export default function HomeScreen() {
 
       {/* Service Buttons */}
       <View style={styles.serviceContainer}>
-        <CardContainer style={styles.bgMenu}>
-          <TouchableOpacity onPress={() => alert("Messages Clicked!")}>
-            <Ionicons name="chatbox-outline" size={24} color="black" />
-          </TouchableOpacity>
-        </CardContainer>
         <CardContainer style={styles.bgMenu2}>
-          <TouchableOpacity onPress={() => alert("Mails Clicked!")}>
+          <TouchableOpacity onPress={() => router.push("/(features)/bulkMail")}>
             <Ionicons name="mail-outline" size={24} color="black" />
           </TouchableOpacity>
         </CardContainer>
         <CardContainer style={styles.bgMenu3}>
-          <TouchableOpacity onPress={() => alert("Notifications Clicked!")}>
+          <TouchableOpacity onPress={() => router.push("/(features)/Whatsapp")}>
             <Ionicons name="logo-whatsapp" size={24} color="black" />
           </TouchableOpacity>
         </CardContainer>
@@ -195,10 +198,9 @@ export default function HomeScreen() {
         </CardContainer>
       </View>
 
-      {/* Widget Cards Grid */}
       <FlatList
         data={widgetData}
-        style={{ flex: 1 }}
+        style={{ flex: 1, marginTop: 16 }}
         keyExtractor={(item) => item.id}
         numColumns={2} // ✅ Ensures a two-column grid
         columnWrapperStyle={{ justifyContent: "space-between", gap: 8 }} // ✅ Ensures proper spacing
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
   cardWidget: {
     width: "50%", // ✅ Ensures two items per row with spacing
     // ✅ Adds space between rows
-    padding: 24,
+    padding: 16,
     borderRadius: 40,
     // borderWidth: 2,
     // borderColor: "#fff",

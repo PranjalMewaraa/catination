@@ -114,8 +114,12 @@ const addEmployees = () => {
       dispatch(setLoading(false));
     }
   };
+
+  const Refresh = () => {
+    FetchEmployee();
+  };
   return (
-    <InnerScreens>
+    <InnerScreens onRefresh={Refresh}>
       <View style={{ padding: 20 }}>
         <ThemedText style={{ fontSize: 44 }} type="title">
           Update

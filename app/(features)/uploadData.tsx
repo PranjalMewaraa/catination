@@ -139,8 +139,9 @@ const addEmployees = () => {
     }
   }, [errorMsg, isSubmitted]);
 
+  const Refresh = () => fetchFilesList();
   return (
-    <InnerScreens>
+    <InnerScreens onRefresh={Refresh}>
       <View style={{ padding: 20 }}>
         <ThemedText style={{ fontSize: 44 }} type="title">
           Upload Marketing

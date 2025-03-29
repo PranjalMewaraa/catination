@@ -3,6 +3,7 @@ import React from "react";
 import Container from "@/components/my_ui/Container";
 import { ThemedText } from "@/components/ThemedText";
 import { useSelector } from "react-redux";
+import { router } from "expo-router";
 
 const _layout = () => {
   const { user, loading, error } = useSelector((state: any) => state.user);
@@ -20,7 +21,10 @@ const _layout = () => {
         Our tools includes - CRM, Email Marketing, Whatsapp Automation, and
         more.
       </ThemedText>
-      <Pressable style={styles.buttonOnboarding}>
+      <Pressable
+        style={styles.buttonOnboarding}
+        onPress={() => router.push("/(tabs)")}
+      >
         <ThemedText style={styles.buttonText}>
           Start your free day today
         </ThemedText>

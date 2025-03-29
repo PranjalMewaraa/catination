@@ -14,10 +14,18 @@ import employees from "../../dummy/employee.json";
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import CardContainer from "@/components/my_ui/CardContainer";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import DynamicModal from "@/components/BestModal";
 import { router } from "expo-router";
+import {
+  setActiveEmployee,
+  setError,
+  setLoading,
+  setPrevEmployee,
+} from "@/store/slices/employeeSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/utils/api";
 
 export default function EmployeeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,9 +45,53 @@ export default function EmployeeScreen() {
   const pastEmployee = useSelector(
     (state: RootState) => state.employee.pastEmployee
   );
+  const dispatch = useDispatch();
   const loading = useSelector((state: RootState) => state.employee.loading);
   const error = useSelector((state: RootState) => state.employee.error);
+  const FetchEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
 
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response: any = await api.post("/employee/getAllActiveEmployee", {
+        id: admin_id,
+      });
+      console.log(response);
+      dispatch(setActiveEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const FetchPastEmployee = async () => {
+    const admin_id = (await AsyncStorage.getItem("id")) || user._id;
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response: any = await api.post("/employee/getAllInactiveEmployee", {
+        id: admin_id,
+      });
+      dispatch(setPrevEmployee(response));
+    } catch (error) {
+      dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
+      console.error("Employee Fetch Error:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  useEffect(() => {
+    FetchEmployee();
+    FetchPastEmployee();
+  }, []);
+
+  const Refresh = () => {
+    FetchEmployee();
+    FetchPastEmployee();
+  };
   const EmployeeCard = ({ name, _id, email, contactNumber }) => {
     const handleCardClick = () => {
       router.push(`(features)/${_id}`);
@@ -47,13 +99,13 @@ export default function EmployeeScreen() {
     return (
       <CardContainer style={styles.cardWidget} onPress={handleCardClick}>
         <View style={styles.empHead}>
-          <Ionicons name="person-outline" style={styles.empImg} size={26} />
+          <Ionicons name="person-outline" style={styles.empImg} size={22} />
           <View>
             <ThemedText
               type="default"
               style={{
                 textOverflow: "wrap",
-                maxWidth: 80,
+                maxWidth: 180,
               }}
             >
               {name}
@@ -71,25 +123,28 @@ export default function EmployeeScreen() {
         <View style={styles.tailEmp}>
           <Ionicons
             name="mail-outline"
-            size={20}
+            size={16}
             style={styles.bgMenu}
             onPress={() => handleModalForInfo("MAIL", email)}
           ></Ionicons>
           <Ionicons
             name="call-outline"
-            size={20}
+            size={16}
             style={styles.bgMenu}
             onPress={() => handleModalForInfo("PHONE NUMBER", contactNumber)}
           ></Ionicons>
-          <Ionicons
-            name="arrow-up-sharp"
-            size={20}
-            style={styles.bgMenuR}
-          ></Ionicons>
+          <View style={styles.bgMenuR}>
+            <ThemedText>View Details</ThemedText>
+            <Ionicons name="trending-up-outline" size={16}></Ionicons>
+          </View>
         </View>
       </CardContainer>
     );
   };
+
+  useEffect(() => {
+    Refresh();
+  }, []);
   const [employeeData, setEmployeeData] = useState(activeEmployee);
   return (
     <AuthContainer
@@ -97,6 +152,7 @@ export default function EmployeeScreen() {
         flex: 1,
         paddingHorizontal: 0,
       }}
+      onRefresh={Refresh}
     >
       <View
         style={{
@@ -168,11 +224,11 @@ export default function EmployeeScreen() {
 
       {employeeData.length > 0 ? (
         <FlatList
-          data={active ? employeeData : pastEmployee}
+          data={active ? activeEmployee : pastEmployee}
           style={{ marginTop: 16 }}
           keyExtractor={(item) => item._id}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: "space-between", gap: 8 }} // ✅ Ensures proper spacing
+          // numColumns={2}
+          // columnWrapperStyle={{ justifyContent: "space-between", gap: 8 }} // ✅ Ensures proper spacing
           contentContainerStyle={styles.widgetContainer}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           renderItem={({ item }) => <EmployeeCard {...item} />}
@@ -219,10 +275,13 @@ export default function EmployeeScreen() {
                 {modalAction}: {modalData}
               </ThemedText>
               <TouchableOpacity
-                style={{ width: "100%", padding: 16, backgroundColor: "#000" }}
+                style={{ width: "100%", padding: 12, backgroundColor: "#000" }}
                 onPress={() => setVisible(false)}
               >
-                <ThemedText type="smalltitle" style={{ color: "#fff" }}>
+                <ThemedText
+                  type="smalltitle"
+                  style={{ color: "#fff", textAlign: "center" }}
+                >
                   Close
                 </ThemedText>
               </TouchableOpacity>
@@ -251,11 +310,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 48,
     backgroundColor: Colors.cardBg,
-    transform: [{ rotate: "45deg" }],
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   tailEmp: {
     width: "100%",
     flexDirection: "row",
+    gap: 4,
   },
   empHead: {
     flexDirection: "row",
@@ -306,10 +368,10 @@ const styles = StyleSheet.create({
     height: "auto",
   },
   cardWidget: {
-    width: "50%", // ✅ Ensures two items per row with spacing
+    width: "100%", // ✅ Ensures two items per row with spacing
     // ✅ Adds space between rows
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     borderRadius: 50,
     backgroundColor: Colors.cardBg,
     alignItems: "flex-start",
@@ -329,7 +391,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 8,
     paddingHorizontal: 8,
-    marginVertical: 8,
     color: "#D3d3d3",
   },
 });

@@ -38,7 +38,7 @@ const Container: React.FC<MyComponentProps> = ({ children }) => {
   //   return null; // Optionally, display a loading screen while checking auth status
   // }
 
-  return <ScrollView style={styles.containerParent}>{children}</ScrollView>;
+  return <View style={styles.containerParent}>{children}</View>;
 };
 
 export default Container;
