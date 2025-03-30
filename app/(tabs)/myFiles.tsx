@@ -25,12 +25,11 @@ import api from "@/utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { useFiles } from "@/hooks/useFiles";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
-import LeadDetailsModal from "@/components/my_ui/LeadDetailModal";
+import { useFiles } from "../../hooks/useFiles";
 
-export default function LeadsScreen() {
+export default function MyFiles() {
   const [modalVisible, setModalVisible] = useState(false);
   const [leadData, setLeadData] = useState();
   const [employeeData, setEmployeeData] = useState(employeefiles);
@@ -113,8 +112,6 @@ export default function LeadsScreen() {
     assignedTo: "",
     property: "",
     location: "",
-    Budget: "",
-    tags: "manual",
   });
 
   const handleInputChange = (field, value) => {
@@ -162,20 +159,20 @@ export default function LeadsScreen() {
   const [manualLeads, setmanualLeads] = useState([]);
   const handleManualLead = async () => {
     const adminId = await AsyncStorage.getItem("id");
-    const res = await api.get(`/leads/leadDetails?adminId=${adminId}`);
-    console.log("ss", res.leads);
-    setmanualLeads(res.leads);
+    const res = await api.post(`/data/getAllData`, {
+      id: adminId,
+    });
+    console.log("ss", res);
+    setmanualLeads(res);
   };
 
   useEffect(() => {
     handleManualLead();
     callMetaLeads();
   }, []);
+  const [bulk, setbulk] = useState(true);
 
   const [visible, setVisible] = useState(false);
-  const [leadModal, setLeadModal] = useState(false);
-  const [selectModalLead, setSelectLeadModal] = useState({});
-  const handleLeadModalClose = () => setLeadModal(false);
   const [modalAction, setModalAction] = useState("");
   const [modalData, setModalData] = useState("");
   const handleModalForInfo = (action = "PHONE", data) => {
@@ -189,57 +186,17 @@ export default function LeadsScreen() {
     console.log(res);
   };
   const EmployeeCard = ({
-    _id,
     name,
-    phone,
+    _id,
     email,
-    property,
-    Budget,
-    source,
     location,
-    status, // could also be: "in-progress", "bought", "not bought"
-    visitDate, // required if status === "in-progress"
-    visitTime, // required if status === "in-progress"
-    interested,
-    reason,
-    tags,
-    createdAt,
-    updatedAt,
-    adminId,
+    source,
+    phone,
+    property,
     assignedTo,
-    employeeDetail,
   }) => {
     const handleCardClick = () => {
-      const lead = {
-        _id: _id,
-        name: name,
-        phone: phone,
-        email: email,
-        property: property,
-        Budget: Budget,
-        source: source,
-        location: location,
-        status: status, // could also be: "in-progress", "bought", "not bought"
-        visitDate: visitDate, // required if status === "in-progress"
-        visitTime: visitTime, // required if status === "in-progress"
-        interested: interested,
-        reason: reason,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        adminId: adminId,
-        assignedTo: assignedTo,
-        employeeDetail: employeeDetail,
-        tags: tags,
-      };
-      setSelectLeadModal(lead);
-      setLeadModal(true);
-    };
-    const getStatusText = () => {
-      if (!status) return "New lead";
-      if (status === "in-progress") return interested;
-      if (status === "bought" || status === "not interested")
-        return ` ${status}`;
-      return `Status: ${status}`;
+      alert(`Lead ID: ${_id}`);
     };
     return (
       <CardContainer style={styles.cardWidget} onPress={handleCardClick}>
@@ -256,7 +213,7 @@ export default function LeadsScreen() {
               type="default"
               style={{ textOverflow: "wrap", maxWidth: 250 }}
             >
-              Assigned to : {employeeDetail?.name}
+              Lead Source : {source || "UNKNOWN"}
             </ThemedText>
           </View>
         </View>
@@ -264,17 +221,9 @@ export default function LeadsScreen() {
           <ThemedText type="smalltitle" style={{ textOverflow: "wrap" }}>
             Looking for : {property}
           </ThemedText>
-          <ThemedText type="default" style={{ textOverflow: "wrap" }}>
+          <ThemedText type="smalltitle" style={{ textOverflow: "wrap" }}>
             Location : {location}
           </ThemedText>
-          <ThemedText type="default" style={{ textOverflow: "wrap" }}>
-            Approched by : {source || "UNKNOWN"}
-          </ThemedText>
-          {status === "in-progress" && (
-            <ThemedText type="default" style={{ textOverflow: "wrap" }}>
-              Visit : {`${visitDate} ${visitTime}` || "UNKNOWN"}
-            </ThemedText>
-          )}
         </View>
         <View style={styles.tailEmp}>
           <Ionicons
@@ -291,8 +240,14 @@ export default function LeadsScreen() {
           ></Ionicons>
           <View style={styles.bgMenuR}>
             <ThemedText type="smalltitle" style={{ textOverflow: "wrap" }}>
-              Status: {getStatusText()}
+              Assigned To
             </ThemedText>
+            <Ionicons
+              name="arrow-up-sharp"
+              size={24}
+              style={{ transform: [{ rotate: "45deg" }] }}
+              onPress={() => router.push(`/(features)/${assignedTo}`)}
+            ></Ionicons>
           </View>
         </View>
         <Modal visible={visible} transparent={true} style={styles.infoModal}>
@@ -348,11 +303,6 @@ export default function LeadsScreen() {
             </View>
           </View>
         </Modal>
-        <LeadDetailsModal
-          visible={leadModal}
-          onClose={handleLeadModalClose}
-          lead={selectModalLead}
-        />
       </CardContainer>
     );
   };
@@ -383,121 +333,70 @@ export default function LeadsScreen() {
       >
         <View style={{ width: "75%" }}>
           <ThemedText style={{ fontSize: 36 }} type="title">
-            Leads
+            Files
           </ThemedText>
         </View>
-        {active === "leads" && (
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Ionicons style={styles.fab} name="add" size={24} color="#fff" />
-          </TouchableOpacity>
-        )}
-      </View>
-      <View style={styles.serviceContainer}>
         <TouchableOpacity
-          style={[
-            styles.bgMenu3,
-            { backgroundColor: active === "leads" ? "#000" : Colors.cardBg },
-            { zIndex: active === "leads" ? 50 : 0 },
-          ]}
-          onPress={() => setActive("leads")}
+          onPress={() =>
+            !bulk
+              ? router.push("/(features)/uploadData")
+              : router.push("/(features)/uploadLeadFiles")
+          }
         >
-          <ThemedText
-            style={{ color: active === "leads" ? "#fff" : "#000" }}
-            type="smalltitle"
-          >
-            Leads
-          </ThemedText>
-        </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          style={[
-            styles.bgMenu4,
-            {
-              backgroundColor: active === "MetaLeads" ? "#000" : Colors.cardBg,
-            },
-          ]}
-          onPress={() => setActive("MetaLeads")}
-        >
-          <ThemedText
-            style={{ color: active === "MetaLeads" ? "#fff" : "#000" }}
-            type="smalltitle"
-          >
-            Meta Leads
-          </ThemedText>
-        </TouchableOpacity> */}
-
-        <TouchableOpacity
-          style={[
-            styles.bgMenu4,
-            {
-              backgroundColor: active === "distribute" ? "#000" : Colors.cardBg,
-              zIndex: active === "distribute" ? 20 : 9,
-            },
-          ]}
-          onPress={() => setActive("distribute")}
-        >
-          <ThemedText
-            style={{ color: active === "distribute" ? "#fff" : "#000" }}
-            type="smalltitle"
-          >
-            Distribute
-          </ThemedText>
+          <Ionicons style={styles.fab} name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {active === "leads" && (
-        <View style={{ flex: 1 }}>
-          <FlatList
-            data={manualLeads}
-            keyExtractor={(item) => item._id}
-            numColumns={1}
-            contentContainerStyle={styles.widgetContainer}
-            renderItem={({ item }) => <EmployeeCard {...item} />}
-            ListEmptyComponent={() => (
-              <View style={styles.emptyContainer}>
-                <ThemedText style={styles.emptyText}>
-                  No leads available
-                </ThemedText>
-              </View>
-            )}
-          />
-        </View>
-      )}
-      {active === "distribute" && (
-        <View style={{ flex: 1, padding: 24 }}>
-          <ThemedText type="subtitle" style={{ marginBottom: 16 }}>
-            Distribute Leads to Employee
-          </ThemedText>
-
-          <MultiSelectDropdown
-            title="Select lead file"
-            data={dropdownArray}
-            onSelectionChange={setSelectedFiles}
-          />
-          <MultiSelectDropdown
-            data={empsel}
-            title="Choose Employees"
-            onSelectionChange={setEmployeeData}
-            isMulti={true}
-          />
-          <Pressable
-            style={{
-              marginVertical: 16,
-              padding: 16,
-              backgroundColor: "black",
-              borderRadius: 50,
-            }}
-            onPress={handleDistributedLeads}
+        <View style={styles.serviceContainer2}>
+          <TouchableOpacity
+            style={[
+              styles.bgMenu3,
+              { backgroundColor: bulk ? "#000" : Colors.cardBg },
+              { zIndex: bulk ? 50 : 0 },
+            ]}
+            onPress={() => setbulk(true)}
           >
             <ThemedText
-              type="smalltitle"
-              style={{ color: "#fff", textAlign: "center" }}
+              style={{ color: bulk ? "#fff" : "#000" }}
+              type="default"
             >
-              Distribute Leads
+              Lead Files
             </ThemedText>
-          </Pressable>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.bgMenu4,
+              {
+                backgroundColor: !bulk ? "#000" : Colors.cardBg,
+              },
+            ]}
+            onPress={() => setbulk(false)}
+          >
+            <ThemedText
+              style={{ color: !bulk ? "#fff" : "#000" }}
+              type="default"
+            >
+              Marketing Files
+            </ThemedText>
+          </TouchableOpacity>
         </View>
       )}
+      {active === "leads" && (
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={bulk ? leadData : manualLeads}
+            keyExtractor={(item) => (bulk ? item.fileName : item._id)}
+            numColumns={1} // ✅ Ensures a two-column grid
+            contentContainerStyle={styles.widgetContainer}
+            renderItem={({ item }) =>
+              bulk ? <FileCard {...item} /> : <FileCard {...item} />
+            }
+          />
+        </View>
+      )}
+
       <DynamicModal
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -527,12 +426,6 @@ export default function LeadsScreen() {
                 value={lead.email}
                 onChangeText={(text) => handleInputChange("email", text)}
               />
-              <MultiSelectDropdown
-                data={empsel}
-                title="Assign lead to employee"
-                onSelectionChange={handleSelectionChange}
-                selectedItems={lead.assignedTo ? [lead.assignedTo] : []} // Assuming it accepts an array
-              />
               <InputBox
                 id="source"
                 placeholder="enter source (call /email /msg etc)"
@@ -548,21 +441,18 @@ export default function LeadsScreen() {
                 onChangeText={(text) => handleInputChange("location", text)}
               />
               <InputBox
-                id="budget"
-                placeholder="enter budgets"
-                inputMode="text"
-                value={lead.Budget}
-                onChangeText={(text) => handleInputChange("Budget", text)}
-              />
-
-              <InputBox
                 id="assignedTo"
                 placeholder="enter query (desc)"
                 inputMode="text"
                 value={lead.property} // Using "property" for query since no "query" field exists in state
                 onChangeText={(text) => handleInputChange("property", text)}
               />
-
+              <MultiSelectDropdown
+                data={empsel}
+                title="Assign lead to employee"
+                onSelectionChange={handleSelectionChange}
+                selectedItems={lead.assignedTo ? [lead.assignedTo] : []} // Assuming it accepts an array
+              />
               <TouchableOpacity
                 style={{
                   padding: 16,
@@ -668,7 +558,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   bgMenu4: {
-    padding: 16,
+    paddingVertical: 4,
     paddingHorizontal: 20,
     borderRadius: 45,
     borderWidth: 2,
@@ -773,16 +663,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginVertical: 8,
     color: "#D3d3d3",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
   },
 });

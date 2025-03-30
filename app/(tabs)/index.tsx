@@ -28,44 +28,44 @@ export default function HomeScreen() {
   const widgetData = [
     {
       id: "1",
-
-      title: "Email Sent",
-      content: "5000",
-      coloricon: "skyblue",
+      title: "Employees ",
+      content: "0",
+      coloricon: "orange",
     },
     {
       id: "2",
 
-      title: "Calls Made",
-      content: "200",
-      coloricon: "green",
+      title: "Email Sent",
+      content: "0",
+      coloricon: "skyblue",
     },
     {
       id: "3",
 
-      title: "Sales Closed",
-      content: "150",
-      coloricon: "purple",
+      title: "Calls Made",
+      content: "0",
+      coloricon: "green",
     },
     {
       id: "4",
 
-      title: "Leads Generated",
-      content: "800",
-      coloricon: "orange",
+      title: "Sales Closed",
+      content: "0",
+      coloricon: "purple",
     },
     {
       id: "5",
 
-      title: "Sales Closed",
-      content: "150",
-      coloricon: "purple",
+      title: "Leads Generated",
+      content: "0",
+      coloricon: "orange",
     },
     {
       id: "6",
-      title: "Leads Generated",
-      content: "800",
-      coloricon: "orange",
+
+      title: "Whatsapp Sent",
+      content: "0",
+      coloricon: "purple",
     },
   ];
   const { user, loading, error } = useSelector(

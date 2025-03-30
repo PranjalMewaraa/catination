@@ -50,8 +50,9 @@ function TabLayout() {
   const options_navigation_drawer = [
     { name: "Dashboard", route: "index", icon: "home-outline" },
     { name: "Our Services", route: "services", icon: "code-working-outline" },
-    { name: "Employees", route: "employees", icon: "person-outline" },
     { name: "Leads", route: "leads", icon: "people-outline" },
+    { name: "My Files", route: "myFiles", icon: "document-outline" },
+    { name: "Employees", route: "employees", icon: "person-outline" },
     { name: "Inventory", route: "inventory", icon: "apps-outline" },
     {
       name: "Log Out",

@@ -106,6 +106,10 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
+            name="(features)/uploadLeadFiles"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="(features)/Helpers/WhatsappTemplate/CreateTemplate"
             options={{ headerShown: false }}
           />

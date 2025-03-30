@@ -123,6 +123,7 @@ export default function EmployeeScreen() {
   };
   const EmployeeCardSold = ({ items }) => {
     const { societyName, _id, email, address, ownerName, propertyName } = items;
+
     return (
       <CardContainer
         style={styles.cardWidget}
@@ -335,6 +336,7 @@ export default function EmployeeScreen() {
                   id="searchAv"
                   placeholder="What are you looking for ..."
                   value={searchAv}
+                  marginVertical={0}
                   onChangeText={(text) => changeAvSearch(text)}
                 />
               </View>
