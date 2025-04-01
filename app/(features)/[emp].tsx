@@ -281,7 +281,7 @@ const Employees = () => {
                 style={styles.deleteButton}
                 onPress={() => OpenDeleteModal(employee)}
               >
-                <Ionicons name="trash-outline" color={"#fff"} size={28} />
+                <Ionicons name="trash-outline" color={"red"} size={28} />
               </TouchableOpacity>
             </View>
           </View>

@@ -97,7 +97,7 @@ export default function MyFiles() {
               transform: [{ translateX: 10 }],
             }}
           >
-            <Ionicons name="trash-outline" size={28} color={"white"} />
+            <Ionicons name="trash-outline" size={28} color={"red"} />
           </View>
         </View>
       </CardContainer>

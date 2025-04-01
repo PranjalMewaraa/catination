@@ -7,13 +7,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "@/utils/api";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setActiveEmployee,
   setError,
   setLoading,
 } from "@/store/slices/employeeSlice";
 import { fetchFiles } from "@/store/slices/filesSlice";
+import { RootState } from "@/store/store";
+import MultiSelectDropdown from "@/components/my_ui/MultiSelectDropdown";
 
 const addEmployees = () => {
   const dispatch = useDispatch();
@@ -22,8 +24,10 @@ const addEmployees = () => {
     societyName: "",
     vacantFlats: "",
     location: "",
+    visibleTo: [],
   });
 
+  const [employeeData, setEmployeeData] = useState([]);
   const [otpStage, setOtpStage] = useState(false);
   const [otp, setOtp] = useState("");
 
@@ -37,14 +41,31 @@ const addEmployees = () => {
   const handleAddInventory = async () => {
     const adminIdx = await AsyncStorage.getItem("id");
 
+    const updatedPropertyData = {
+      ...propertyData,
+      visibleTo: employeeData, // Adding employeeData here
+    };
+
     const res = await api.post("/newProperties/createProperty", {
       adminId: adminIdx,
-      ...propertyData,
+      ...updatedPropertyData,
     });
     Toast.show({ type: "success", text1: "Unit Added Succesfully" });
 
     router.push("/(tabs)/inventory");
   };
+
+  const activeEmployee = useSelector(
+    (state: RootState) => state.employee.activeEmployee
+  );
+
+  function transformArrayEmp(data: []) {
+    return data.map((item) => ({
+      label: `${item.name} | ${item.email}`,
+      value: item._id,
+    }));
+  }
+  const dropdownArray = transformArrayEmp(activeEmployee);
 
   return (
     <InnerScreens>
@@ -88,6 +109,12 @@ const addEmployees = () => {
               onChangeText={(text) => handleInputChange("location", text)}
             />
           </View>
+          <MultiSelectDropdown
+            data={dropdownArray}
+            title="Choose Employees"
+            onSelectionChange={setEmployeeData}
+            isMulti={true}
+          />
         </View>
         <TouchableOpacity
           style={{ padding: 16, backgroundColor: "#000", borderRadius: 8 }}

@@ -33,7 +33,7 @@ import LeadDetailsModal from "@/components/my_ui/LeadDetailModal";
 export default function LeadsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [leadData, setLeadData] = useState();
-  const [employeeData, setEmployeeData] = useState(employeefiles);
+  const [employeeData, setEmployeeData] = useState([]);
   const [active, setActive] = useState("leads");
   const [selectedFiles, setSelectedFiles] = useState([]);
   const { files, loading, error, loadFiles } = useFiles();
@@ -98,7 +98,7 @@ export default function LeadsScreen() {
               transform: [{ translateX: 10 }],
             }}
           >
-            <Ionicons name="trash-outline" size={28} color={"white"} />
+            <Ionicons name="trash-outline" size={28} color={"red"} />
           </View>
         </View>
       </CardContainer>
@@ -188,6 +188,35 @@ export default function LeadsScreen() {
     const res = await api.post("/metaleads/metaLeads");
     console.log(res);
   };
+  const [searchAv, setSearchAv] = useState(null);
+  let debounceTimeout: string | number | NodeJS.Timeout | undefined;
+  const changeAvSearch = (text) => {
+    setSearchAv(text); // Update state immediately
+    clearTimeout(debounceTimeout);
+
+    // Set new timeout
+    debounceTimeout = setTimeout(() => {
+      // Your API call
+
+      const filterData = filterBySearchTerm(manualLeads, text);
+    }, 300);
+  };
+
+  function filterBySearchTerm(data, searchTerm) {
+    if (!searchTerm || searchTerm.trim() === "") {
+      return data;
+    }
+
+    // Convert search term to lowercase for case-insensitive search
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
+    return data.filter((item) => {
+      // Convert object to string and check if it includes the search term
+      return Object.values(item)
+        .map((value) => String(value).toLowerCase()) // Convert each value to string and lowercase
+        .some((value) => value.includes(lowerSearchTerm)); // Check if any value includes search term
+    });
+  }
   const EmployeeCard = ({
     _id,
     name,
@@ -234,6 +263,7 @@ export default function LeadsScreen() {
       setSelectLeadModal(lead);
       setLeadModal(true);
     };
+
     const getStatusText = () => {
       if (!status) return "New lead";
       if (status === "in-progress") return interested;
@@ -447,8 +477,33 @@ export default function LeadsScreen() {
 
       {active === "leads" && (
         <View style={{ flex: 1 }}>
+          <View
+            style={{ paddingHorizontal: 16, height: "auto", marginBottom: 8 }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-evenly",
+                alignItems: "center",
+                backgroundColor: "#E0E0E0",
+                borderRadius: 16,
+              }}
+            >
+              <Ionicons name="search" size={20} />
+              <View style={{ width: "80%" }}>
+                <InputBox
+                  id="searchAv"
+                  placeholder="What are you looking for ..."
+                  value={searchAv}
+                  marginVertical={0}
+                  onChangeText={(text) => changeAvSearch(text)}
+                />
+              </View>
+            </View>
+          </View>
           <FlatList
-            data={manualLeads}
+            data={filterBySearchTerm(manualLeads, searchAv)}
             keyExtractor={(item) => item._id}
             numColumns={1}
             contentContainerStyle={styles.widgetContainer}

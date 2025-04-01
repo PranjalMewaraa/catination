@@ -22,6 +22,8 @@ import { post } from "axios";
 import api from "@/utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import InputBox from "@/components/my_ui/InputBox";
+import MultiSelectDropdown from "@/components/my_ui/MultiSelectDropdown";
+import Toast from "react-native-toast-message";
 
 export default function EmployeeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,17 +73,37 @@ export default function EmployeeScreen() {
   };
 
   const EmployeeCard = ({ items }) => {
-    const { societyName, _id, vacantFlats, location } = items;
+    const { societyName, _id, vacantFlats, location, visibleTo } = items;
     const handleCardClick = () => {
       router.push(`/(features)/${_id}`);
     };
+    const activeEmployee = useSelector(
+      (state: RootState) => state.employee.activeEmployee
+    );
+
+    function transformArrayEmp(data: []) {
+      return data.map((item) => ({
+        label: `${item.name} | ${item.email}`,
+        value: item._id,
+      }));
+    }
+    const dropdownArray = transformArrayEmp(activeEmployee);
+    const filteredDropdownArray = dropdownArray.filter((item) =>
+      visibleTo.includes(item.value)
+    );
+
     return (
       <CardContainer style={styles.cardWidget2}>
         <View style={styles.empHead}>
           <Ionicons name="business-outline" style={styles.empImg} size={20} />
           <View>
-            <ThemedText type="default">{"Available"}</ThemedText>
-            <ThemedText type="smalltitle">{vacantFlats}</ThemedText>
+            <ThemedText type="default"> {societyName}</ThemedText>
+            <ThemedText
+              type="default"
+              style={{ textOverflow: "wrap", height: "auto" }}
+            >
+              <Ionicons name="location"></Ionicons> {location}
+            </ThemedText>
           </View>
         </View>
         <View style={styles.body}>
@@ -89,14 +111,43 @@ export default function EmployeeScreen() {
             type="smalltitle"
             style={{ textOverflow: "wrap", height: "auto" }}
           >
-            {societyName}
+            Available : {vacantFlats} Units
           </ThemedText>
-          <ThemedText
-            type="default"
-            style={{ textOverflow: "wrap", height: "auto" }}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 4,
+              alignItems: "center",
+            }}
           >
-            <Ionicons name="location"></Ionicons> {location}
-          </ThemedText>
+            <ThemedText>
+              Visible To : {visibleTo?.length || 0} Employees
+            </ThemedText>
+          </View>
+          {visibleTo.length > 0 && (
+            <FlatList
+              data={filteredDropdownArray}
+              horizontal
+              keyExtractor={(item) => item.value}
+              renderItem={({ item }) => (
+                <View
+                  style={{
+                    backgroundColor: Colors.primary,
+                    padding: 4,
+                    borderRadius: 8,
+                    marginRight: 6,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    borderWidth: 1,
+                  }}
+                >
+                  <ThemedText style={{ color: "black", marginRight: 5 }}>
+                    {item.label}
+                  </ThemedText>
+                </View>
+              )}
+            />
+          )}
         </View>
         <View style={styles.tailEmp}>
           <Ionicons
@@ -114,6 +165,7 @@ export default function EmployeeScreen() {
           <Ionicons
             name="trash-outline"
             size={18}
+            color="red"
             style={styles.bgMenu}
             onPress={() => openModal(items, "DELETE")}
           ></Ionicons>
@@ -197,6 +249,7 @@ export default function EmployeeScreen() {
             size={20}
             onPress={() => openModal(items, "DELETE")}
             style={styles.bgMenu}
+            color={"red"}
           ></Ionicons>
         </View>
       </CardContainer>
@@ -346,9 +399,7 @@ export default function EmployeeScreen() {
             data={filterBySearchTerm(inventories, searchAv)}
             style={{ marginTop: 16 }}
             keyExtractor={(item) => item._id}
-            numColumns={2}
             key={active ? "active-2-cols" : "sold-2-cols"} // ✅ Add this line
-            columnWrapperStyle={{ justifyContent: "space-between", gap: 8 }}
             contentContainerStyle={styles.widgetContainer}
             ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
             renderItem={({ item }) => <EmployeeCard items={item} />}
@@ -417,7 +468,7 @@ const ModalContent = ({
   setInventorySold,
   setModalVisible,
 }) => {
-  const [vac, setVac] = useState(0);
+  const [vac, setVac] = useState(id?.vacantFlat);
   const [emailsee, setVEmail] = useState(0);
   const fetchInventory = async () => {
     const adminId = await AsyncStorage.getItem("id");
@@ -443,7 +494,19 @@ const ModalContent = ({
       [field]: value,
     }));
   };
-  const HANDLE_ACTION = async (id, action) => {
+  const activeEmployee = useSelector(
+    (state: RootState) => state.employee.activeEmployee
+  );
+
+  function transformArrayEmp(data: []) {
+    return data.map((item) => ({
+      label: `${item.name} | ${item.email}`,
+      value: item._id,
+    }));
+  }
+  const dropdownArray = transformArrayEmp(activeEmployee);
+  const [employeeData, setEmployeeData] = useState(id?.visibleTo);
+  const HANDLE_ACTION = async (id, action, obj = {}) => {
     const adminId = await AsyncStorage.getItem("id");
     const endpoint1 = active ? "newProperties" : "propertyDetails";
     const endpoint2 =
@@ -455,14 +518,17 @@ const ModalContent = ({
 
     const payload =
       active && action === "EDIT"
-        ? { vacantFlats: vac }
+        ? { vacantFlats: vac, visibleTo: [...employeeData] }
         : !active && action === "EDIT"
         ? { ...formData }
         : {};
 
     if (action === "EDIT") {
       const res = await api.put(`/${endpoint1}/${endpoint2}`, payload);
-
+      Toast.show({
+        type: "success",
+        text1: "Updated Successfully",
+      });
       fetchInventory();
       fetchInventorySold();
       setModalVisible(false);
@@ -513,6 +579,12 @@ const ModalContent = ({
             placeholder="32"
             value={vac}
             onChangeText={(text) => setVac(text)}
+          />
+          <MultiSelectDropdown
+            data={dropdownArray}
+            title="Choose Employees"
+            onSelectionChange={setEmployeeData}
+            isMulti={true}
           />
 
           <TouchableOpacity onPress={() => HANDLE_ACTION(id._id, "EDIT")}>
@@ -751,7 +823,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardWidget2: {
-    width: "50%", // ✅ Ensures two items per row with spacing
+    width: "100%", // ✅ Ensures two items per row with spacing
     // ✅ Adds space between rows
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -775,7 +847,7 @@ const styles = StyleSheet.create({
     height: "auto",
     paddingVertical: 16,
     paddingHorizontal: 8,
-    marginVertical: 8,
+
     textAlign: "center",
     color: "#D3d3d3",
     flexDirection: "column",
