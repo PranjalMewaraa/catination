@@ -3,30 +3,28 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
   RefreshControl,
-  TouchableOpacity,
-  Image,
 } from "react-native";
 import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { isAuthenticated, logout as performLogout } from "@/utils/isAuth";
+import { isAuthenticated } from "@/utils/isAuth";
 import { router, useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import MenuContainer from "./MenuContainer";
+import { Ionicons } from "@expo/vector-icons";
+import { ThemedText } from "../ThemedText";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import { ThemedText } from "../ThemedText";
-import MenuContainer from "./MenuContainer";
 
 interface MyComponentProps {
   children: React.ReactNode;
   style?: object;
-  name: String;
-  icon: String;
-  onRefresh?: () => Promise<void> | void;
-  handleIconAction?: () => Promise<void> | void; // Added onRefresh prop
+  name?: string; // Fixed String to string
+  icon?: string; // Fixed String to string
+  onRefresh?: () => Promise<void> | void; // Added onRefresh prop
 }
 
 type RootStackParamList = {
@@ -37,48 +35,37 @@ type RootStackParamList = {
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, "signup">;
 
-const EmpAuthContainer: React.FC<MyComponentProps> = ({
+const EmpInnerScreens: React.FC<MyComponentProps> = ({
   children,
   style,
-  onRefresh,
   name,
   icon,
-  handleIconAction,
+  onRefresh,
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [role_user, setRole] = useState("");
   const navigation = useNavigation<NavigationProps>();
-
-  const handleLogout = async () => {
-    try {
-      await performLogout();
-      navigation.navigate("login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const [role_user, setRole] = useState();
   useEffect(() => {
     const checkAuthStatus = async () => {
       const status: boolean = await isAuthenticated();
       if (!status) {
         navigation.navigate("login");
       }
+
+      setIsLoggedIn(status);
       const role = await AsyncStorage.getItem("role");
 
       if (role === "admin") {
         router.replace("/(tabs)");
       }
-      setRole(role);
-      setIsLoggedIn(status);
       setIsAuthChecked(true);
     };
 
     checkAuthStatus();
   }, []);
 
-  // Handle refresh action
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -104,6 +91,7 @@ const EmpAuthContainer: React.FC<MyComponentProps> = ({
       resetScrollToCoords={{ x: 0, y: 0 }}
       contentContainerStyle={{
         justifyContent: "center",
+        paddingTop: 42,
       }}
       enableOnAndroid={true}
       style={[styles.containerParent, style]}
@@ -111,20 +99,17 @@ const EmpAuthContainer: React.FC<MyComponentProps> = ({
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          colors={["#9Bd35A", "#689F38"]}
-          tintColor="#689F38"
+          colors={["#9Bd35A", "#689F38"]} // Optional: customize refresh indicator colors
+          tintColor="#689F38" // Optional: iOS
         />
       }
     >
       <View style={styles.header}>
         <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
-          <MenuContainer style={styles.bgMenu2}>
-            <Image
-              source={require("../../assets/images/catination.png")}
-              width={16}
-              resizeMode="contain"
-              style={styles.Img}
-            ></Image>
+          <MenuContainer style={styles.bgMenu}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back-sharp" size={24} color="black" />
+            </TouchableOpacity>
           </MenuContainer>
           <View style={styles.headerTitle}>
             <ThemedText
@@ -135,20 +120,21 @@ const EmpAuthContainer: React.FC<MyComponentProps> = ({
             </ThemedText>
           </View>
         </View>
-
-        <MenuContainer style={styles.bgMenu}>
-          <TouchableOpacity onPress={handleLogout}>
-            <Ionicons name={"log-out"} size={24} color="black" />
-          </TouchableOpacity>
-        </MenuContainer>
+        {icon && (
+          <MenuContainer style={styles.bgMenu}>
+            <TouchableOpacity>
+              <Ionicons name={icon} size={24} color="black" />
+            </TouchableOpacity>
+          </MenuContainer>
+        )}
       </View>
-      {children}
       <Toast />
+      {children}
     </KeyboardAwareScrollView>
   );
 };
 
-export default EmpAuthContainer;
+export default EmpInnerScreens;
 
 const styles = StyleSheet.create({
   containerParent: {
@@ -163,7 +149,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     alignItems: "center",
-    marginTop: 28,
+    marginTop: 16,
     padding: 16,
     justifyContent: "space-between",
   },
@@ -174,13 +160,5 @@ const styles = StyleSheet.create({
   bgMenu: {
     padding: 16,
     borderRadius: 100,
-  },
-  bgMenu2: {
-    borderRadius: 20,
-  },
-  Img: {
-    width: 56,
-    height: 56,
-    backgroundColor: "transparent",
   },
 });

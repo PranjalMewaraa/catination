@@ -127,7 +127,7 @@ const login = () => {
 
       <Pressable style={styles.buttonOnboarding} onPress={handleSubmit}>
         <ThemedText style={styles.buttonText}>
-          {isLoading ? "Logging you in .." : "Login in"}
+          {isLoading ? "Logging you in .." : "Login"}
         </ThemedText>
       </Pressable>
     </Container>

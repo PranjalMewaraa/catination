@@ -14,6 +14,9 @@ import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/n
 import { useNavigation } from "expo-router";
 import api from "@/utils/api";
 import Toast from "react-native-toast-message";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/store/slices/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Signup = () => {
   type RootStackParamList = {
@@ -41,14 +44,20 @@ const Signup = () => {
       [field]: value,
     }));
   };
-
+  const dispatch = useDispatch();
   const Signup = async () => {
-    const res = await api.post("/users/register", {
+    const response = await api.post("/users/register", {
       name: formData.name,
       email: formData.email,
       password: formData.password,
       role: "admin",
     });
+    console.log(response);
+    dispatch(setUser(response.user));
+    AsyncStorage.setItem("auth_token", response.token);
+    AsyncStorage.setItem("id", response.user._id);
+    AsyncStorage.setItem("role", response.user.role);
+    AsyncStorage.setItem("user", JSON.stringify(response.user));
     Toast.show({
       type: "success",
       text1: "Signup Success",
@@ -150,5 +159,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     lineHeight: 24,
     fontWeight: 600,
+    textDecorationLine: "underline",
   },
 });

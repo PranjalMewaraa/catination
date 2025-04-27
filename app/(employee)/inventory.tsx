@@ -5,26 +5,27 @@ import {
   FlatList,
   Switch,
 } from "react-native";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "../../components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import AuthContainer from "@/components/my_ui/AuthContainer";
+import EmpAuthContainer from "../../components/my_ui/EmpAuthContainer";
 import { ScrollView } from "react-native-gesture-handler";
 import employees from "../../dummy/employee.json";
-import { Colors } from "@/constants/Colors";
+import { Colors } from "../../constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
-import CardContainer from "@/components/my_ui/CardContainer";
+import CardContainer from "../../components/my_ui/CardContainer";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import DynamicModal from "@/components/BestModal";
+import { RootState } from "../../store/store";
+import DynamicModal from "../../components/BestModal";
 import { router } from "expo-router";
 import { post } from "axios";
-import api from "@/utils/api";
+import api from "../../utils/api";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import InputBox from "@/components/my_ui/InputBox";
-import MultiSelectDropdown from "@/components/my_ui/MultiSelectDropdown";
+import InputBox from "../../components/my_ui/InputBox";
+import MultiSelectDropdown from "../../components/my_ui/MultiSelectDropdown";
 import Toast from "react-native-toast-message";
+import EmpInnerScreens from "@/components/my_ui/EmpInnerContainer";
 
 export default function EmployeeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,22 +38,21 @@ export default function EmployeeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const fetchInventory = async () => {
-    const adminId = await AsyncStorage.getItem("id");
-    const res = await api.get("/newProperties/getAllProperties", {
-      adminId: adminId,
-    });
+    const User = await AsyncStorage.getItem("user");
+    const obj = JSON.parse(User);
 
-    setInventory(res.data);
-    console.log(res.data);
-  };
-  const fetchInventorySold = async () => {
-    const adminId = await AsyncStorage.getItem("id");
-    const res = await api.get("/propertyDetails/getAllProperties", {
-      adminId: adminId,
-    });
+    try {
+      const res = await api.post("/employee/getAllProperties", {
+        employeeId: obj.id,
+        adminId: obj.adminId,
+      });
 
-    setInventorySold(res.data);
+      setInventory(res.properties);
+    } catch (e) {
+      console.log(e);
+    }
   };
+
   const handleDateChange = (event, selectedDate) => {
     if (selectedDate) {
       setSelectedDate(selectedDate); // Update the selected date state
@@ -85,12 +85,10 @@ export default function EmployeeScreen() {
 
   useEffect(() => {
     fetchInventory();
-    fetchInventorySold();
   }, []);
 
   const Refresh = () => {
     fetchInventory();
-    fetchInventorySold();
   };
 
   const [selected, setSelected] = useState(null);
@@ -171,62 +169,23 @@ export default function EmployeeScreen() {
               Available : {vacantFlats} Units
             </ThemedText>
             <ThemedText style={{ fontSize: 12 }}>
-              (last updated: {formatDate(updatedAt)})
+              (last updated: {updatedAt})
             </ThemedText>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 4,
-              alignItems: "center",
-            }}
-          >
-            <ThemedText>
-              Visible To : {visibleTo?.length || 0} Employees
-            </ThemedText>
-          </View>
-          {visibleTo.length > 0 && (
-            <FlatList
-              data={filteredDropdownArray}
-              horizontal
-              keyExtractor={(item) => item.value}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    backgroundColor: Colors.primary,
-                    padding: 4,
-                    borderRadius: 8,
-                    marginRight: 6,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                  }}
-                >
-                  <ThemedText style={{ color: "black", marginRight: 5 }}>
-                    {item.label}
-                  </ThemedText>
-                </View>
-              )}
-            />
-          )}
         </View>
         <View style={styles.tailEmp}>
-          <Ionicons
-            name="pencil-outline"
-            size={18}
-            style={styles.bgMenu}
-            onPress={() => openModal(items, "EDIT")}
-          ></Ionicons>
-          <Ionicons
-            name="trash-outline"
-            size={18}
-            color="red"
-            style={styles.bgMenu}
-            onPress={() => openModal(items, "DELETE")}
-          ></Ionicons>
+          <View style={styles.bgMenu}>
+            <Ionicons
+              name="pencil-outline"
+              size={18}
+              onPress={() => openModal(items, "EDIT")}
+            ></Ionicons>
+            <ThemedText>Edit</ThemedText>
+          </View>
+
           <View style={styles.bgMenu}>
             <ThemedText style={{ fontSize: 14 }}>
-              Inventory Created: {formatDate(createdAt)}
+              Created: {createdAt}
             </ThemedText>
           </View>
         </View>
@@ -352,7 +311,7 @@ export default function EmployeeScreen() {
   };
 
   return (
-    <AuthContainer
+    <EmpInnerScreens
       style={{
         flex: 1,
         paddingHorizontal: 0,
@@ -373,64 +332,8 @@ export default function EmployeeScreen() {
             Inventory
           </ThemedText>
         </View>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#000",
-            width: 64,
-            height: 64,
-            borderRadius: 16,
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={() =>
-            active
-              ? router.push("/(features)/addNewProperty")
-              : router.push("/(features)/addNewFlat")
-          }
-        >
-          <ThemedText>
-            <Ionicons name="add" size={32} color="#fff" />
-          </ThemedText>
-        </TouchableOpacity>
       </View>
-      <View style={styles.serviceContainer}>
-        <TouchableOpacity
-          style={[
-            styles.bgMenu3,
-            { backgroundColor: active ? "#000" : "#f3f4ee" },
-            { zIndex: active ? 50 : 0 },
-          ]}
-          onPress={() => setActive(!active)}
-        >
-          <ThemedText
-            style={{ color: active ? "#fff" : "gray" }}
-            type="default"
-          >
-            Available
-          </ThemedText>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.bgMenu4,
-            { backgroundColor: !active ? "#000" : "#f3f4ee" },
-          ]}
-          onPress={() => setActive(!active)}
-        >
-          <ThemedText
-            style={{ color: !active ? "#fff" : "gray" }}
-            type="default"
-          >
-            Sold Property
-          </ThemedText>
-          <Ionicons
-            name="hourglass-outline"
-            size={24}
-            color={active ? "black" : "white"}
-          />
-        </TouchableOpacity>
-      </View>
       {active && (
         <>
           <DynamicModal
@@ -692,7 +595,7 @@ export default function EmployeeScreen() {
           </View>
         </>
       )}
-      {active && inventories.length > 0 ? (
+      {active && inventories?.length > 0 ? (
         <>
           <FlatList
             data={filterBySearchTerm(inventories, searchAv)}
@@ -758,14 +661,14 @@ export default function EmployeeScreen() {
           setModalVisible={setModalVisible}
         />
       </DynamicModal>
-    </AuthContainer>
+    </EmpInnerScreens>
   );
 }
 
 const ModalContent = ({
   id,
   action,
-  active,
+  active = true,
   setInventory,
   setInventorySold,
   setModalVisible,
@@ -773,20 +676,19 @@ const ModalContent = ({
   const [vac, setVac] = useState(id?.vacantFlat);
   const [emailsee, setVEmail] = useState(0);
   const fetchInventory = async () => {
-    const adminId = await AsyncStorage.getItem("id");
-    const res = await api.get("/newProperties/getAllProperties", {
-      adminId: adminId,
-    });
+    const User = await AsyncStorage.getItem("user");
+    const obj = JSON.parse(User);
 
-    setInventory(res.data);
-  };
-  const fetchInventorySold = async () => {
-    const adminId = await AsyncStorage.getItem("id");
-    const res = await api.get("/propertyDetails/getAllProperties", {
-      adminId: adminId,
-    });
+    try {
+      const res = await api.post("/employee/getAllProperties", {
+        employeeId: obj.id,
+        adminId: obj.adminId,
+      });
 
-    setInventorySold(res.data);
+      setInventory(res.properties);
+    } catch (e) {
+      console.log(e);
+    }
   };
   const [formData, setFormData] = useState({ ...id });
 
@@ -812,22 +714,24 @@ const ModalContent = ({
   );
   const [employeeData, setEmployeeData] = useState(id?.visibleTo);
   const HANDLE_ACTION = async (id, action, obj = {}) => {
-    const adminId = await AsyncStorage.getItem("id");
-    const endpoint1 = active ? "newProperties" : "propertyDetails";
+    const User = await AsyncStorage.getItem("user");
+    const Obj = JSON.parse(User);
+    const endpoint1 = "newProperties";
     const endpoint2 =
       action === "EDIT" && active
-        ? `updateProperty?adminId=${adminId}&id=${id}`
+        ? `updateProperty?adminId=${Obj.adminId}&id=${id}&employeeId=${Obj.id}`
         : action === "EDIT" && !active
         ? `updateProperty?adminId=${adminId}&id=${id}`
         : `deleteProperty?adminId=${adminId}&id=${id}`;
 
     const payload =
       active && action === "EDIT"
-        ? { vacantFlats: vac, visibleTo: [...employeeData] }
+        ? { vacantFlats: vac }
         : !active && action === "EDIT"
         ? { ...formData }
         : {};
-
+    console.log("ms");
+    console.log(payload, endpoint1, endpoint2);
     if (action === "EDIT") {
       const res = await api.put(`/${endpoint1}/${endpoint2}`, payload);
       Toast.show({
@@ -835,12 +739,12 @@ const ModalContent = ({
         text1: "Updated Successfully",
       });
       fetchInventory();
-      fetchInventorySold();
+
       setModalVisible(false);
     } else {
       const res = await api.delete(`/${endpoint1}/${endpoint2}`);
       fetchInventory();
-      fetchInventorySold();
+
       setModalVisible(false);
     }
   };
@@ -877,34 +781,7 @@ const ModalContent = ({
           <ThemedText type="default" style={{ marginBottom: 0 }}>
             current : {id?.vacantFlats}
           </ThemedText>
-          <ThemedText type="default" style={{ marginBottom: 4 }}>
-            currently Visible to : {id?.visibleTo?.length} Employees
-          </ThemedText>
-          {id?.visibleTo.length > 0 && (
-            <FlatList
-              data={filteredDropdownArray}
-              horizontal
-              style={{ marginBottom: 32 }}
-              keyExtractor={(item) => item.value}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    backgroundColor: Colors.primary,
-                    padding: 4,
-                    borderRadius: 8,
-                    marginRight: 6,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                  }}
-                >
-                  <ThemedText style={{ color: "black", marginRight: 5 }}>
-                    {item.label}
-                  </ThemedText>
-                </View>
-              )}
-            />
-          )}
+
           <ThemedText type="smalltitle" style={{ marginBottom: 0 }}>
             Set No of Vacant Flats
           </ThemedText>
@@ -914,12 +791,6 @@ const ModalContent = ({
             placeholder="32"
             value={vac}
             onChangeText={(text) => setVac(text)}
-          />
-          <MultiSelectDropdown
-            data={dropdownArray}
-            title="Choose Employees"
-            onSelectionChange={setEmployeeData}
-            isMulti={true}
           />
 
           <TouchableOpacity onPress={() => HANDLE_ACTION(id._id, "EDIT")}>
@@ -1085,6 +956,9 @@ const styles = StyleSheet.create({
   bgMenu: {
     padding: 16,
     borderRadius: 48,
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
     backgroundColor: Colors.cardBg,
   },
   bgMenuR: {

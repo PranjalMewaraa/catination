@@ -29,6 +29,7 @@ import { useFiles } from "@/hooks/useFiles";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 import LeadDetailsModal from "@/components/my_ui/LeadDetailModal";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function LeadsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,6 +38,12 @@ export default function LeadsScreen() {
   const [active, setActive] = useState("leads");
   const [selectedFiles, setSelectedFiles] = useState([]);
   const { files, loading, error, loadFiles } = useFiles();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  const [messageEmpty, setMessageEmpty] = useState("No leads available");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const activeEmployee = useSelector(
     (state: RootState) => state.employee.activeEmployee
   );
@@ -264,6 +271,19 @@ export default function LeadsScreen() {
       setLeadModal(true);
     };
 
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const currentYear = new Date().getFullYear();
+
+      const day = date.getDate().toString().padStart(2, "0"); // Ensure two digits for the day
+      const month = date.toLocaleString("default", { month: "short" }); // Get short month name
+      const year =
+        date.getFullYear() !== currentYear
+          ? `, ${date.getFullYear()}`
+          : `, ${date.getFullYear()}`; // Only include year if it's not the current year
+
+      return `${day}, ${month}${year}`;
+    }
     const getStatusText = () => {
       if (!status) return "New lead";
       if (status === "in-progress") return interested;
@@ -299,6 +319,9 @@ export default function LeadsScreen() {
           </ThemedText>
           <ThemedText type="default" style={{ textOverflow: "wrap" }}>
             Approched by : {source || "UNKNOWN"}
+          </ThemedText>
+          <ThemedText type="default" style={{ textOverflow: "wrap" }}>
+            Posted On : {formatDate(createdAt) || "UNKNOWN"}
           </ThemedText>
           {status === "in-progress" && (
             <ThemedText type="default" style={{ textOverflow: "wrap" }}>
@@ -394,6 +417,40 @@ export default function LeadsScreen() {
       </View>
     );
   }
+
+  const handleDateChange = (event, selectedDate) => {
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const filterByDate = (data, dateKey) => {
+    return data.filter((item) => {
+      const itemDate = new Date(item[dateKey]);
+      return itemDate.toDateString() === selectedDate.toDateString();
+    });
+  };
+
+  const handleFilter = () => {
+    const filteredData = filterByDate(manualLeads, "createdAt");
+    setmanualLeads(filteredData);
+    setFiltersApplied(true);
+    setFilterModalVisible(false);
+    setMessageEmpty("No leads created on the selected date");
+  };
+
+  const handleResetFilters = async () => {
+    await handleManualLead(); // refetch leads
+    setFiltersApplied(false);
+    setFilterModalVisible(false);
+    setSelectedDate(new Date());
+    setMessageEmpty("No leads available");
+  };
+
+  const handleFilterIconClick = () => {
+    setFilterModalVisible(true);
+  };
+
   return (
     <AuthContainer
       style={{
@@ -477,9 +534,7 @@ export default function LeadsScreen() {
 
       {active === "leads" && (
         <View style={{ flex: 1 }}>
-          <View
-            style={{ paddingHorizontal: 16, height: "auto", marginBottom: 8 }}
-          >
+          <View style={{ paddingHorizontal: 8 }}>
             <View
               style={{
                 flexDirection: "row",
@@ -491,7 +546,7 @@ export default function LeadsScreen() {
               }}
             >
               <Ionicons name="search" size={20} />
-              <View style={{ width: "80%" }}>
+              <View style={{ width: "65%" }}>
                 <InputBox
                   id="searchAv"
                   placeholder="What are you looking for ..."
@@ -500,8 +555,24 @@ export default function LeadsScreen() {
                   onChangeText={(text) => changeAvSearch(text)}
                 />
               </View>
+              <TouchableOpacity
+                onPress={handleFilterIconClick}
+                style={{
+                  borderWidth: filtersApplied ? 2 : 1,
+                  padding: 12,
+                  borderRadius: 8,
+                  borderColor: filtersApplied ? "blue" : "black",
+                }}
+              >
+                <Ionicons
+                  name="filter"
+                  size={20}
+                  color={filtersApplied ? "blue" : "black"}
+                />
+              </TouchableOpacity>
             </View>
           </View>
+
           <FlatList
             data={filterBySearchTerm(manualLeads, searchAv)}
             keyExtractor={(item) => item._id}
@@ -510,9 +581,7 @@ export default function LeadsScreen() {
             renderItem={({ item }) => <EmployeeCard {...item} />}
             ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
-                <ThemedText style={styles.emptyText}>
-                  No leads available
-                </ThemedText>
+                <ThemedText style={styles.emptyText}>{messageEmpty}</ThemedText>
               </View>
             )}
           />
@@ -635,6 +704,156 @@ export default function LeadsScreen() {
             </View>
           </View>
         </ScrollView>
+      </DynamicModal>
+      <DynamicModal
+        isVisible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+      >
+        <View
+          style={{
+            padding: 16,
+            borderRadius: 10,
+            backgroundColor: "white",
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <ThemedText type="title" style={{ marginBottom: 16, fontSize: 22 }}>
+            Sort & Filter
+          </ThemedText>
+
+          <TouchableOpacity
+            style={{
+              marginBottom: 12,
+              paddingVertical: 10,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              backgroundColor: "#f1f1f1",
+              alignItems: "center",
+            }}
+            onPress={() => {
+              const sorted = [...manualLeads].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              );
+              setmanualLeads(sorted);
+              setFiltersApplied(true);
+              setFilterModalVisible(false);
+            }}
+          >
+            <ThemedText type="default" style={{ fontSize: 16 }}>
+              Newest First
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{
+              marginBottom: 16,
+              paddingVertical: 10,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              backgroundColor: "#f1f1f1",
+              alignItems: "center",
+            }}
+            onPress={() => {
+              const sorted = [...manualLeads].sort(
+                (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+              );
+              setmanualLeads(sorted);
+              setFiltersApplied(true);
+              setFilterModalVisible(false);
+            }}
+          >
+            <ThemedText type="default" style={{ fontSize: 16 }}>
+              Recently Updated
+            </ThemedText>
+          </TouchableOpacity>
+
+          <View
+            style={{
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <ThemedText
+              type="default"
+              style={{ fontWeight: "600", marginBottom: 4 }}
+            >
+              Filter by Date
+            </ThemedText>
+            <View
+              style={{
+                backgroundColor: "#d3d3d3",
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 8,
+                borderRadius: 8,
+                width: "100%",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#d3d3d3",
+                  padding: 8,
+                  borderRadius: 8,
+                }}
+              >
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  style={{ marginRight: 8 }}
+                />
+                <ThemedText>{selectedDate.toDateString()}</ThemedText>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, date) => {
+                    setShowDatePicker(false); // Hide picker once a date is selected or dismissed
+                    if (date) {
+                      setSelectedDate(date);
+                    }
+                  }}
+                />
+              )}
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleFilter}
+            style={{
+              marginTop: 24,
+              paddingVertical: 12,
+              borderRadius: 8,
+              backgroundColor: "black",
+              alignItems: "center",
+            }}
+          >
+            <ThemedText type="default" style={{ color: "white", fontSize: 16 }}>
+              Apply Filter
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleResetFilters}
+            style={{
+              marginTop: 12,
+              paddingVertical: 12,
+              borderRadius: 8,
+              backgroundColor: "gray",
+              alignItems: "center",
+            }}
+          >
+            <ThemedText type="default" style={{ color: "white", fontSize: 16 }}>
+              Reset Filters
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
       </DynamicModal>
     </AuthContainer>
   );
@@ -770,8 +989,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "#fff",
     flexDirection: "row",
     backgroundColor: Colors.cardBg,
     alignItems: "center",

@@ -137,7 +137,7 @@ const LeadFiles = () => {
 
   const openSampleFile = () => {
     const url =
-      "https://crm-userdata.s3.ap-south-1.amazonaws.com/Sample-file/sample_bulk_leads.xlsx"; // Replace with your actual sample file URL
+      "https://crm-userdata.s3.ap-south-1.amazonaws.com/Sample-file/sample-lead-data.xlsx"; // Replace with your actual sample file URL
     Linking.openURL(url).catch((err) =>
       setErrorMsg("Failed to open link: " + err.message)
     );

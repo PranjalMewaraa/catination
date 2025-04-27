@@ -25,11 +25,25 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
+  const [employee, setEmployee] = useState();
+  const [totalLeads, setTotalLeads] = useState();
+  const [totalLeadsBought, setTotalLeadsBought] = useState();
+
+  const getTotalLeads = async () => {
+    const res = await api.get("/leads/totalNumberOfLeads");
+
+    setTotalLeads(res.totalLeads);
+  };
+  const getTotalLeadsBought = async () => {
+    const res = await api.get("/leads/countLeadsWithStatusBought");
+    console.log(res);
+    setTotalLeadsBought(res.totalBoughtLeads);
+  };
   const widgetData = [
     {
       id: "1",
       title: "Employees ",
-      content: "0",
+      content: employee?.length || 0,
       coloricon: "orange",
     },
     {
@@ -50,14 +64,14 @@ export default function HomeScreen() {
       id: "4",
 
       title: "Sales Closed",
-      content: "0",
+      content: totalLeadsBought || 0,
       coloricon: "purple",
     },
     {
       id: "5",
 
       title: "Leads Generated",
-      content: "0",
+      content: totalLeads || 0,
       coloricon: "orange",
     },
     {
@@ -68,6 +82,7 @@ export default function HomeScreen() {
       coloricon: "purple",
     },
   ];
+
   const { user, loading, error } = useSelector(
     (state: RootState) => state.user
   );
@@ -89,6 +104,8 @@ export default function HomeScreen() {
       const response: any = await api.post("/employee/getAllActiveEmployee", {
         id: admin_id,
       });
+
+      setEmployee(response);
       dispatch(setActiveEmployee(response));
     } catch (error) {
       dispatch(setError("Employee Fetch Error . Please try again.")); // Store error in Redux
@@ -115,13 +132,17 @@ export default function HomeScreen() {
     }
   };
   useEffect(() => {
+    getTotalLeads();
     FetchEmployee();
     FetchPastEmployee();
+    getTotalLeadsBought();
   }, []);
 
   const Refresh = () => {
     FetchEmployee();
+    getTotalLeads();
     FetchPastEmployee();
+    getTotalLeadsBought();
   };
 
   const WidgetCard = ({ title, content, coloricon }) => {

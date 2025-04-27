@@ -69,6 +69,7 @@ export default function RootLayout() {
             name="(features)/[emp]"
             options={{ headerShown: false }}
           />
+
           <Stack.Screen
             name="(features)/updateEmployee/[id]"
             options={{ headerShown: false }}
@@ -120,6 +121,7 @@ export default function RootLayout() {
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="employeeLogin" options={{ headerShown: false }} />
           <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="coming-soon" options={{ headerShown: false }} />
           <Stack.Screen name="(onboard)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
 

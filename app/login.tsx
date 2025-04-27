@@ -131,7 +131,7 @@ const login = () => {
       </View>
       <Pressable style={styles.buttonOnboarding} onPress={handleSubmit}>
         <ThemedText style={styles.buttonText}>
-          {isLoading ? "Logging you in .." : "Login in"}
+          {isLoading ? "Logging you in .." : "Login"}
         </ThemedText>
       </Pressable>
       <View style={styles.subt}>
@@ -186,5 +186,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     lineHeight: 24,
     fontWeight: 600,
+    textDecorationLine: "underline",
   },
 });

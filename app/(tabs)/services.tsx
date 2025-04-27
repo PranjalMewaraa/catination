@@ -32,7 +32,7 @@ export default function ServicesScreen() {
       title: "Bulk Email",
       content: "Easy email campaign tool",
       coloricon: "skyblue",
-      route: "/(features)/BulkEmail",
+      route: "/coming-soon",
     },
     {
       id: "2",
@@ -40,7 +40,7 @@ export default function ServicesScreen() {
       title: "Whatsapp",
       content: "Whatsapp marketing made easy",
       coloricon: "green",
-      route: "/(features)/Whatsapp",
+      route: "/coming-soon",
     },
     {
       id: "3",
@@ -57,14 +57,6 @@ export default function ServicesScreen() {
       content: "Manage and distribute your leads",
       coloricon: "orange",
       route: "/(tabs)/leads",
-    },
-    {
-      id: "6",
-      icon: "chatbox-ellipses-outline",
-      title: "Text SMS",
-      content: "Launch S.M.S campaigns fast and easily",
-      coloricon: "orange",
-      route: "/(tabs)/employees",
     },
   ];
 

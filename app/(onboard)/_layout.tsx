@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "LugfaItalic",
     marginTop: 36,
-    lineHeight: 34,
+    lineHeight: 38,
   },
   description: {
     fontSize: 16,
